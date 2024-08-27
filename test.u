@@ -1,0 +1,27 @@
+func FIVE() -> num {
+    NOT_FIVE : num = 5 + 8 / 4
+    return NOT_FIVE
+}
+
+$insert(std.u)
+
+func five(c : num) -> num {
+    return FIVE()
+}
+
+cmd : string = "C:/Windows/cmd.exe"
+a : string = cmd
+c : num = 6
+b : bool = five(5) < 6
+
+d : [] num = [ 1 2, 3 + 4 5 ]
+append(d, 64)
+e : num = d[4]
+println(e, pop(d))
+
+for i : num = 0; i < 8; i = i + 1 {
+    if i - 2 > 2 {
+        print("IT'S OVER 4: ")
+    }
+    println(i)
+}

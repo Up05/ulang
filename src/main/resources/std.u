@@ -1,0 +1,3 @@
+# Because this language will not have multithreading and I currently do not have: structs, maps, sum types or multiple return values
+# What's the simples way to do errors? Well, just have a global variable...
+error : num = 0
