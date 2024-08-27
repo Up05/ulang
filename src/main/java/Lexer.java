@@ -76,15 +76,12 @@ public class Lexer {
     private String next() {
         return raw_tokens[current_token ++];
     }
-
     private void skip(int count) {
         current_token += count;
     }
-
     private boolean has(int count) {
         return current_token + count < raw_tokens.length;
     }
-
     private boolean EOF() {
         return current_token + 1 >= raw_tokens.length;
     }
@@ -304,7 +301,7 @@ public class Lexer {
     };
 
     public static int get_precedence(Token t) {
-        String table_ref[][] = null;
+        String[][] table_ref = null;
         if(t.type == Type.UNARY_OPERATOR) table_ref = unary_precedence_table;
         else if(t.type == Type.BINARY_OPERATOR) table_ref = binary_precedence_table;
         else System.out.println("It is only possible to get precedence of unary & binary operators!");

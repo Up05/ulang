@@ -42,7 +42,6 @@ public class Debug {
         sender.close();
     }
 
-
     private static String zip(Ast ast) {
         StringBuilder b = new StringBuilder();
 

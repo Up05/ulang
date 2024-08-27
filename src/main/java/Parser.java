@@ -41,48 +41,26 @@ public class Parser {
         potentialException.file = filename;
     }
 
-    public Ast parse() throws ParserException {
+    public Ast parse() throws Exception {
         Ast.Root root = new Ast.Root();
-        Ast node = root;
-        int to_skip = 0;
 
-        while (current_token < tokens.size()) {
+        while(current_token < tokens.size()) {
 
             if(peek(0).is("\n")) potentialException.line ++;
             if(peek(0).type == Lexer.Type.INFORMATIONAL) {
                 if(next() == null) break;
                 continue;
             }
-
-            // This would be so much better, if Java had out params...
-            // Result res; // sizeof Result should be around 16 bytes, so it's fine to keep creating it
-
-            // node = parse_binary_op(-1);
-            // if(node != null) root.children.add(node);
-            // node = parse_decl();
-            node = parse_func_decl();
-            if(node != null) {
-                root.children.add(node);
-                continue;
-            }
-            node = parse_decl();
-            if(node != null) {
-                root.children.add(node);
-                continue;
-            }
-            node = parse_for();
-            if(node != null) {
-                root.children.add(node);
-                continue;
-            }
-            node = parse_if();
-            if(node != null) {
-                root.children.add(node);
-                continue;
-            }
-            node = parse_func();
-            if(node != null)
-                root.children.add(node);
+            Ast node = null;
+            node = new Monad<>(node, null) // This is just kind of repeating, not fully, but still
+                
+                .bind(this::parse_func_decl)
+                .bind(this::parse_decl)
+                .bind(this::parse_for)
+                .bind(this::parse_if)
+                .bind(this::parse_func)
+                .unwrap();
+            if(node != null) root.children.add(node);
 
             current_token ++; // shouldn't need this eventually...
         }

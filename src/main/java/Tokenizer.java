@@ -99,6 +99,7 @@ public class Tokenizer {
             char r = str.charAt(i);
             boolean any = false;
 
+            // Deal with one-off chars
             for(char ch : chars) {
                 if (r == ch) {
                     any = true;
@@ -106,6 +107,7 @@ public class Tokenizer {
                 }
             }
 
+            // Deal with ranges
             for(int j = 0; j < between.length - 1; j += 2) {
                 if (r >= between[j] && r <= between[j + 1]) {
                     any = true;
