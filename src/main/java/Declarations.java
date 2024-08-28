@@ -9,13 +9,6 @@ import java.util.function.Function;
 // TODO move to some other place
 public class Declarations {
 
-    Map<String, Class> types = Map.of (
-        "bool", Boolean.class,
-        "num",  Double.class,
-        "char", Character.class,
-        "string", String.class
-    );
-
 }
 
 

@@ -13,6 +13,7 @@ public class Interpreter {
     }
 
     public void interpret(Ast ast) {
+        if(ast == null) return;
         switch(ast) {
         case Ast.Root node -> {
             for(Ast child : node.children) interpret(child);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Validator {
     LexerException exception = new LexerException("", "", 1);
 
+    @SuppressWarnings("t")
     public void validate(ArrayList<Token> tokens, String filename) throws LexerException {
         exception.file = filename;
 
@@ -32,8 +33,8 @@ public class Validator {
                             found_block = true;
                             break;
                         }
-                        warnf(!tokens.get(j).is("("), "Statements like 'for' and 'if' do not have perentheses here. They will be read as an expression");
                     }
+                    warnf(!tokens.get(i + 1).is("("), "Statements like 'for' and 'if' do not have parentheses here. They will be read as an expression");
                     assertf(found_block, "Found '%s' without a corresponding block! Use 'if <expr> do <one-liner>' or 'if <expr> { ... }'", t.token);
                 }
             }

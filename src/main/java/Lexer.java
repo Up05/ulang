@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 
 class LexerException extends Exception {
     String message, file;
@@ -102,19 +103,27 @@ public class Lexer {
             new Monad<>(success, false)
                 .bind(this::lex_keyword)
                 .bind(this::lex_info)
+                .bind(this::lex_operator)
                 .bind(this::lex_delim)
                 .bind(this::lex_const)
                 .bind(this::lex_list)
-                .bind(this::lex_return_type)
-                .bind(this::lex_operator)
+                .bind(this::lex_type)
+                // .bind(this::lex_return_type)
                 .bind(this::lex_func_decl)
                 .bind(this::lex_func_call)
                 .bind(this::lex_var)
+                .bind(this::lexer_skip_bad)
                 .unwrap();
 
         }
         tokens.add(new Token(raw_tokens[raw_tokens.length - 1], Type.INFORMATIONAL)); // 'EOF'
         return tokens;
+    }
+
+    private boolean lexer_skip_bad() {
+        System.out.println("Could not lex token: '" + peek(0) + "'");
+        skip(1);
+        return false;
     }
 
     private boolean lex_keyword() {
@@ -177,13 +186,14 @@ public class Lexer {
         return true;
     }
 
-    private void lex_type() {
+    private boolean lex_type() {
 
         if(peek(0).equals("[")) {
             next();
             if(peek(0).equals("]")) { // declarations, e.g.: a : [] num
-                tokens.add(new Token("array", Type.TYPE));
                 next();
+                if(!types.containsKey(peek(0))) { skip(-2); return false; }
+                tokens.add(new Token("array", Type.TYPE));
                 tokens.add(new Token(next(), Type.TYPE));
             } else if(peek(0).equals("map")) { // maps, e.g.: a : [map] string num
                 tokens.add(new Token("map", Type.TYPE));
@@ -191,10 +201,16 @@ public class Lexer {
                 next(); // skips ']'
                 tokens.add(new Token(next(), Type.TYPE));
                 tokens.add(new Token(next(), Type.TYPE));
+            } else {
+                skip(-1);
+                return false;
             }
-        } else
+            return true;
+        } else if(types.containsKey(peek(0))) {
             tokens.add(new Token(next(), Type.TYPE));
-
+            return true;
+        }
+        return false;
     }
 
     private boolean is_const(String token) {
@@ -219,26 +235,22 @@ public class Lexer {
             binary = matching_operator_chars(binary_operators);
 
         if(unary > 0 && binary > 0) { // ambiguous
-            if(tokens.size() == 0) {
+            if(tokens.isEmpty()) {
                 tokens.add(new Token(concat_tokens(unary), Type.UNARY_OPERATOR));
-                // skip(unary);
                 return true;
             }
 
             Type prev_token = tokens.get(tokens.size() - 1).type;
             if(Util.array_contains(tokens_potentially_before_binary_operator, prev_token)) {
                 tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
-                // skip(binary);
                 return true;
             }
         }
 
         if(unary > 0) {
             tokens.add(new Token(concat_tokens(unary), Type.UNARY_OPERATOR));
-            // skip(unary);
         } else if(binary > 0) {
             tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
-            // skip(binary);
         } else return false;
         return true;
     }
@@ -315,5 +327,12 @@ public class Lexer {
 
         return 1;
     }
+
+    static Map<String, Class> types = Map.of (
+        "bool", Boolean.class,
+        "num",  Double.class,
+        "char", Character.class,
+        "string", String.class
+    );
 
 }

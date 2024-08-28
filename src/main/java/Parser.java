@@ -32,7 +32,6 @@ public class Parser {
         ResultDEPRECATED(Ast ast, int skip) { ok = true; this.ast = ast; this.skip = skip; }
     }
 
-    private Declarations decl = new Declarations();
     private ArrayList<Token> tokens;
     private int current_token = 0;
 
@@ -53,7 +52,6 @@ public class Parser {
             }
             Ast node = null;
             node = new Monad<>(node, null) // This is just kind of repeating, not fully, but still
-                
                 .bind(this::parse_func_decl)
                 .bind(this::parse_decl)
                 .bind(this::parse_for)
@@ -133,7 +131,7 @@ public class Parser {
             next(); next(); next();
             node.type = Map.class;
         } else {
-            node.type = decl.types.get(next().token);
+            node.type = Lexer.types.get(next().token);
         }
         assertf(node.type != null, "Invalid type: '%s' found!", peek(0).token);
 
@@ -267,9 +265,8 @@ public class Parser {
         }
         next(); // skips ')'
 
-        // TODO: Read the return type
         if(peek(0).type == Lexer.Type.TYPE) {
-            node.ret = decl.types.get(next().token);
+            node.ret = Lexer.types.get(next().token);
         }
 
         node.body = parse_block();
@@ -281,8 +278,7 @@ public class Parser {
         next();
         Ast.For node = new Ast.For();
         node.body = new ArrayList<>();
-
-        node.pre = parse_expr();
+        if(!peek(0).is("{") && !peek(0).is("do")) node.pre = parse_expr();
         if(peek(0).is(";")) {
             next();
             node.cond = parse_binary_op(-1);
@@ -294,7 +290,16 @@ public class Parser {
 
         // Think of while(!glfwWindowShouldClose(window)) { ... }, here you ~~could~~ do: for !glfwWindowShowClose(window) { ... }
         // Very much taken from Odin
-        if(node.pre != null && node.cond == null && node.post == null) node.cond = node.pre;
+        if(node.cond == null && node.post == null) {
+            if (node.pre != null) {
+                node.cond = node.pre;
+                node.pre = null;
+            } else {
+                Ast.Const bool = new Ast.Const();
+                bool.value = true;
+                node.cond = bool;
+            }
+        }
 
         node.body = parse_block();
 
