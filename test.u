@@ -1,2 +1,3 @@
+$insert(std.u)
 for true do print("loop")
 
