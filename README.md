@@ -141,4 +141,23 @@ Either way, `if` is just:
 if <expr> { ... }
 ```
 
+## Preprocessor
+
+Currently, there is only a single preprocessor derictive: `$insert(<filename>)`. 
+It simply replaces itself with the contents of another file. 
+You can do this ANYWHERE in the program. 
+
+Although, generally, you should `$insert(std.u)` at the top of your file to include the standard library and 'error' variable
+
+## Errors
+
+I currently, do not have structures, maps, multiple return values, sum types and, importantly, threads, so, I believe, the simplest way to do errors for me, is to just have a global variable `error` of type integer.
+
+You can register your own errors with the builtin `register_error(<error_val: int>, <name: string>)` function.  
+The program can automatically handle an error for you with the builtin `handle(<error: int>)` function.
+
+Errors higher than `0` are fatal, the program will exit if handle() is called with such an error passed through it.
+Errors with value lower than `0` are warnings, I guess.
+If `error` is 0, there is no error.
+
 
