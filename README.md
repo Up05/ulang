@@ -117,8 +117,6 @@ e.g.:
 for i : num = 0; i < len(array); i = i + 1 {  }
 ```
 
-*You can also use `do` instead of `{ }`, (actually, everywhere, even for function declaration...)* 
-
 However, for a while loop equivalent, simply, only provide a single expression:
 
 ```C
