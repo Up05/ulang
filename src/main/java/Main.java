@@ -44,12 +44,20 @@ public class Main {
         }
 
 
-        String text = Files.readString(in_file, StandardCharsets.UTF_8);
-        text = Preprocessor.preprocess(text);
-
+        // String text = Files.readString(in_file, StandardCharsets.UTF_8);
+        // text = Preprocessor.preprocess(text);
         // All of these file names and my current compile error system will be deprecated and deleted.
-        String[] raw_tokens = new Tokenizer().tokenize(text, in_file.getFileName().toString());
+        // String[] raw_tokens = new Tokenizer().tokenize(text, in_file.getFileName().toString());
+        
+        ArrayList<String> prepped_tokens = Preprocessor.preprocess(base, in_file.toString());
+
+        String[] raw_tokens = prepped_tokens.toArray(new String[prepped_tokens.size()]);
+
+
         Debug.print_tokens(raw_tokens);
+
+        // System.exit(0);
+
         System.out.println("---".repeat(24));
 
         ArrayList<Token> tokens = new Lexer(raw_tokens, in_file.getFileName().toString()).lex();

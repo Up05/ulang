@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -64,10 +65,14 @@ public class Lexer {
     private ArrayList<Token> tokens = new ArrayList<>();
     int current_token = 0;
 
+    private Stack<Error> error_stack = new Stack<>();
+
     public Lexer(String[] raw_tokens, String filename) {
-        potential_exception.file = filename;
-        potential_exception.line = 1;
+        // potential_exception.file = filename;
+        // potential_exception.line = 1;
         this.raw_tokens = raw_tokens;
+        error_stack.push(new Error(Error.Type.COMP, filename));
+
     }
 
     private String peek(int offset) {
@@ -84,23 +89,29 @@ public class Lexer {
         return current_token + count < raw_tokens.length;
     }
     private boolean EOF() {
-        return current_token + 1 >= raw_tokens.length;
+        return peek(0).equals("EOF");
     }
 
     // unnecessary work, but the parser should become simpler
     public ArrayList<Token> lex() throws Exception {
 
         while(current_token < raw_tokens.length) {
-            if (EOF()) break;
+            if (EOF()) {
+                error_stack.pop();
+                next();
+                continue;
+            }
 
             if (peek(0).equals("\n")) {
-                potential_exception.line++;
+                // potential_exception.line++;
+                error_stack.peek().line ++;
                 tokens.add(new Token(peek(0), Type.INFORMATIONAL));
                 next();
             }
 
             boolean success = false;
             new Monad<>(success, false)
+                .bind(this::lex_preproc)
                 .bind(this::lex_keyword)
                 .bind(this::lex_info)
                 .bind(this::lex_operator)
@@ -123,6 +134,18 @@ public class Lexer {
     private boolean lexer_skip_bad() {
         System.out.println("Could not lex token: '" + peek(0) + "'");
         skip(1);
+        return false;
+    }
+    
+    // TODO: Append tokens for parser to do too
+    private Boolean lex_preproc() {
+        if(!peek(0).equals("$")) return false;
+        next();
+        if(peek(0).equals("push")) {
+            next();
+            error_stack.push(new Error(Error.Type.COMP, next().substring(1, peek(-1).length() - 1)));
+            return true;
+        }
         return false;
     }
 
