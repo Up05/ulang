@@ -131,7 +131,7 @@ public class Parser {
             next(); next(); next();
             node.type = Map.class;
         } else {
-            node.type = Lexer.types.get(next().token);
+            node.type = SyntaxDefinitions.types.get(next().token);
         }
         assertf(node.type != null, "Invalid type: '%s' found!", peek(0).token);
 
@@ -266,7 +266,7 @@ public class Parser {
         next(); // skips ')'
 
         if(peek(0).type == Lexer.Type.TYPE) {
-            node.ret = Lexer.types.get(next().token);
+            node.ret = SyntaxDefinitions.types.get(next().token);
         }
 
         node.body = parse_block();

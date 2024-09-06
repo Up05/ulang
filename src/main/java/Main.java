@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         if(args.length < 1) {
-            System.out.println(
+            System.out.println (
                 """ 
                     Usage:
                     ulang <file>
@@ -54,7 +54,10 @@ public class Main {
         String[] raw_tokens = prepped_tokens.toArray(new String[prepped_tokens.size()]);
 
 
+        System.out.println("---".repeat(24));
         Debug.print_tokens(raw_tokens);
+
+        new TokenValidator(prepped_tokens, in_file.getFileName().toString()).validate();
 
         // System.exit(0);
 
@@ -62,6 +65,7 @@ public class Main {
 
         ArrayList<Token> tokens = new Lexer(raw_tokens, in_file.getFileName().toString()).lex();
         Debug.print_lexed_tokens(tokens);
+        System.out.println("---".repeat(24));
         new Validator().validate(tokens, in_file.getFileName().toString());
 
         Ast ast = new Parser(tokens, in_file.getFileName().toString()).parse();

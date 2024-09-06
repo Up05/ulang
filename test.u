@@ -1,3 +1,7 @@
-print("A test")
+# print("A test")
 $insert "test2.u"
 print("B test")
+
+func name(a: num = 625) num {
+
+}

@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.HashSet;
-import java.util.Map;
 
 class LexerException extends Exception {
     String message, file;
@@ -50,13 +49,7 @@ public class Lexer {
     public static boolean could_be_expr(Token token) {
         return token.type.is_any(Type.CONSTANT, Type.VARIABLE, Type.FUNCTION_CALL, Type.UNARY_OPERATOR) || token.is("(");
     }
-    static private final Type[] tokens_potentially_before_binary_operator = { Type.CONSTANT, Type.VARIABLE, Type.FUNCTION_CALL, Type.SYMBOL };
 
-    static private final String[]  unary_operators = { "+", "-", "!" };
-    static private final String[] binary_operators = { ".", "@", "+", "-", "*", "/", "%", "||", "&&", "!=", "==", "<=", ">=", "<", ">", }; // Yes it's duplicate, but flattened -- faster*
-    static private final String[] informational    = { "\n", "EOF" };
-    static private final String[] delimiters       = { ":", "=", "(", ")", "]", "{", "}", ";", "," };
-    static private final String[] keywords         = { "do", "if", "for", "return" };
     // for init; loop start; loop end do loop middle
 
     LexerException potential_exception = new LexerException("", "", 0);
@@ -72,7 +65,6 @@ public class Lexer {
         // potential_exception.line = 1;
         this.raw_tokens = raw_tokens;
         error_stack.push(new Error(Error.Type.COMP, filename));
-
     }
 
     private String peek(int offset) {
@@ -150,17 +142,17 @@ public class Lexer {
     }
 
     private boolean lex_keyword() {
-        if(Util.array_contains(keywords, peek(0)))
+        if(Util.array_contains(SyntaxDefinitions.keywords, peek(0)))
             return tokens.add(new Token(next(), Type.KEYWORD));
         return false;
     }
     private boolean lex_info() {
-        if(Util.array_contains(informational, peek(0)))
+        if(Util.array_contains(SyntaxDefinitions.informational, peek(0)))
             return tokens.add(new Token(next(), Type.INFORMATIONAL));
         return false;
     }
     private boolean lex_delim() {
-        if(Util.array_contains(delimiters, peek(0)))
+        if(Util.array_contains(SyntaxDefinitions.delimiters, peek(0)))
             return tokens.add(new Token(next(), Type.SYMBOL));
         return false;
     }
@@ -215,7 +207,7 @@ public class Lexer {
             next();
             if(peek(0).equals("]")) { // declarations, e.g.: a : [] num
                 next();
-                if(!types.containsKey(peek(0))) { skip(-2); return false; }
+                if(!SyntaxDefinitions.types.containsKey(peek(0))) { skip(-2); return false; }
                 tokens.add(new Token("array", Type.TYPE));
                 tokens.add(new Token(next(), Type.TYPE));
             } else if(peek(0).equals("map")) { // maps, e.g.: a : [map] string num
@@ -229,7 +221,7 @@ public class Lexer {
                 return false;
             }
             return true;
-        } else if(types.containsKey(peek(0))) {
+        } else if(SyntaxDefinitions.types.containsKey(peek(0))) {
             tokens.add(new Token(next(), Type.TYPE));
             return true;
         }
@@ -254,8 +246,8 @@ public class Lexer {
     }
 
     private boolean lex_operator() {
-        int unary = matching_operator_chars(unary_operators),
-            binary = matching_operator_chars(binary_operators);
+        int unary = matching_operator_chars(SyntaxDefinitions.unary_operators),
+            binary = matching_operator_chars(SyntaxDefinitions.binary_operators);
 
         if(unary > 0 && binary > 0) { // ambiguous
             if(tokens.isEmpty()) {
@@ -264,7 +256,7 @@ public class Lexer {
             }
 
             Type prev_token = tokens.get(tokens.size() - 1).type;
-            if(Util.array_contains(tokens_potentially_before_binary_operator, prev_token)) {
+            if(Util.array_contains(SyntaxDefinitions.tokens_potentially_before_binary_operator, prev_token)) {
                 tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
                 return true;
             }
@@ -320,25 +312,10 @@ public class Lexer {
         throw potential_exception;
     }
 
-    private static String unary_precedence_table[][] = {
-        { "!" },
-        { "+", "-" }
-    };
-
-    private static String binary_precedence_table[][] = {
-        { "or_else"},
-        { "@" },
-        { "&&", "||" },
-        { "==", "!=", "<", ">", "<=", ">=" },
-        { "+", "-" },
-        { "*", "/", "%" },
-        { "." }
-    };
-
     public static int get_precedence(Token t) {
         String[][] table_ref = null;
-        if(t.type == Type.UNARY_OPERATOR) table_ref = unary_precedence_table;
-        else if(t.type == Type.BINARY_OPERATOR) table_ref = binary_precedence_table;
+        if(t.type == Type.UNARY_OPERATOR) table_ref = SyntaxDefinitions.unary_precedence_table;
+        else if(t.type == Type.BINARY_OPERATOR) table_ref = SyntaxDefinitions.binary_precedence_table;
         else System.out.println("It is only possible to get precedence of unary & binary operators!");
 
         for(int i = 0; i < table_ref.length; i ++) {
@@ -350,12 +327,5 @@ public class Lexer {
 
         return 1;
     }
-
-    static Map<String, Class> types = Map.of (
-        "bool", Boolean.class,
-        "num",  Double.class,
-        "char", Character.class,
-        "string", String.class
-    );
 
 }

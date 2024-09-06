@@ -46,7 +46,7 @@ public class Validator {
     }
 
 
-    private char find_bad_char_in_name(String token) {
+    public static char find_bad_char_in_name(String token) {
         // tokens can't really be of zero length.
         if(Character.isDigit(token.charAt(0))) return token.charAt(0);
 
@@ -55,7 +55,7 @@ public class Validator {
         return '\0';
     }
 
-    private char find_bad_char_in_number(String token) {
+    public static char find_bad_char_in_number(String token) {
         for(char r : token.toCharArray()) {
             if(Character.isDigit(r)) continue;
             if(r == '.') continue;
@@ -65,13 +65,13 @@ public class Validator {
         return '\0';
     }
 
-    private void assertf(boolean expr, String format, Object... values) throws LexerException {
+    public void assertf(boolean expr, String format, Object... values) throws LexerException {
         if(expr) return;
         exception.message = String.format(format, values) + "\n";
         throw exception;
     }
 
-    private void warnf(boolean expr, String format, Object... values) {
+    public void warnf(boolean expr, String format, Object... values) {
         if(expr) return;
         exception.message = String.format(format, values);
         System.out.println("[LEXER WARNING] " + exception.message);

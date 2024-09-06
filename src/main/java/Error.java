@@ -24,17 +24,17 @@ public class Error {
     public Error(Type type, String file) {
         prefix = type;
         this.file = file;
-        line = 0;
+        line = 1;
     }
 
     /** '\n' in `msg` are automatically indented. (replaced* with \t\n) */
     public void assertf(boolean expr, String name, String msg, Object... args) {
         if(expr) return;
 
-        System.out.println(RED + prefix + CYAN + "at '" + file+ "' ln:" + line + " " + name);
+        System.out.println(RED + prefix.name + CYAN + "in file '" + file + "' ln:" + line + " " + RED + name);
         System.out.print('\t');
-        System.out.println(msg);
-        System.out.println(msg.replaceAll("\n", "\t\n").formatted(args));
+        System.out.println(msg.replaceAll("\n", "\t\n").formatted(args) + RESET);
+        System.exit(65); // sysexits.h
     }
 
 }
