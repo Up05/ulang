@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ulang:jar">
+    <output-path>$PROJECT_DIR$/out/</output-path>
+    <root id="archive" name="ulang.jar">
+      <element id="module-output" name="ulang" />
+    </root>
+  </artifact>
+</component>
