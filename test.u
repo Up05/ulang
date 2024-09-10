@@ -2,6 +2,8 @@
 $insert "test2.u"
 print("B test")
 
-func name(a: num = 625) num {
+# Parser bug with 'for': if I have: for ;; {, it counts '{' as var
 
+for i : num = 0; i < 5; i = i + 1 {
+    println(i)
 }

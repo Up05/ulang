@@ -33,7 +33,7 @@ public class Error {
 
         System.out.println(RED + prefix.name + CYAN + "in file '" + file + "' ln:" + line + " " + RED + name);
         System.out.print('\t');
-        System.out.println(msg.replaceAll("\n", "\t\n").formatted(args) + RESET);
+        System.out.println(msg.replaceAll("\n", "\n\t").formatted(args) + RESET); // no real need for replace or regex here, but it's fine.
         System.exit(65); // sysexits.h
     }
 

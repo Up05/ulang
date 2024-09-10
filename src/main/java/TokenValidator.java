@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 public class TokenValidator {
@@ -13,25 +15,8 @@ public class TokenValidator {
     }
 
     public void validate() throws Exception {
-        
-        while(curr < raw_tokens.size()) {
-            
-            boolean success = false;
-            new Monad<>(success, false)
-                .bind(this::pop_file)
-                .bind(this::push_file)
-                .bind(this::inc_newline)
-                .bind(this::v_func_decl)
-                .bind(this::v_decl)
-                .bind(this::v_func_call)
-                .bind(this::v_unary_operator)
-                .bind(this::v_binary_operator)
-                .bind(this::skip_some_tokens)
-                .bind(this::unexpected_token)
-                .unwrap();
-
-        }
-
+        while(curr < raw_tokens.size())
+            v_stmt();
     }
 
     private String peek(int offset) {
@@ -43,6 +28,7 @@ public class TokenValidator {
     private void skip(int count) {
         curr += count;
     }
+    // TODO: rename to something, idk yet
     private boolean expect(int count) {
         return curr + count < raw_tokens.size() && curr + count >= 0;
     }
@@ -86,7 +72,29 @@ public class TokenValidator {
         assertf(false, "Unexpected token", "Found an unexpected token: '%s'!", peek(0));
         return true;
     }
+
     // v_ -- validate_
+    private void v_stmt() throws Exception {
+        boolean success = false;
+        new Monad<>(success, false)
+            .bind(this::pop_file)
+            .bind(this::push_file)
+            .bind(this::inc_newline)
+            .bind(this::v_func_decl)
+            .bind(this::v_if)
+            .bind(this::v_for)
+            .bind(this::v_decl)
+            .bind(this::v_func_call)
+            .bind(this::v_unary_operator)
+            .bind(this::v_var)
+            .bind(this::v_const)
+            .bind(this::skip_some_tokens)
+            .bind(this::unexpected_token)
+            .unwrap();
+
+        if(expect(1)) v_binary_operator();
+    }
+
     private boolean v_func_decl() throws Exception {
         if(!peek(0).equals("func")) return false;
         next();
@@ -106,6 +114,7 @@ public class TokenValidator {
         return true;
     }
 
+    private Set<String> declared_vars = new HashSet<>();
     private boolean v_decl() throws Exception {
         if(!peek(1).equals(":") && !peek(1).equals("=")) return false;
         String name = next();
@@ -113,8 +122,9 @@ public class TokenValidator {
         validate_identifier(name, "name of variable: '%s'!", name);
 
         if(peek(0).equals(":")) {
-            validate_identifier(peek(1), "type: '%s'", peek(1));
+            declared_vars.add(name);
             next(); // kind of out of order, skips ':' when should skip '<type>'
+            validate_identifier(peek(0), "type: '%s'", peek(0));
             next();
         }
 
@@ -128,17 +138,16 @@ public class TokenValidator {
 
     private boolean v_expr() throws Exception {
         boolean success = false;
-        // Monad but only like const, function call, variable & stuff
-        success = v_const();
         new Monad<>(success, false)
             .bind(this::v_const)
-            .bind(this::v_func_decl)
+            .bind(this::v_func_call)
             .bind(this::v_unary_operator)
-            .bind(this::v_binary_operator)
+            .bind(this::v_var)
             .bind(this::skip_some_tokens)
             .bind(this::unexpected_token)
             .unwrap();
 
+        if(expect(1)) v_binary_operator();
         return success;
     }
 
@@ -175,6 +184,14 @@ public class TokenValidator {
         return false;
     }
 
+    private boolean v_var() {
+        if(declared_vars.contains(peek(0))) {
+            next();
+            return true;
+        }
+        return false;
+    }
+
     private boolean v_func_call() throws Exception {
         if(!peek(1).equals("(")) return false;
         String name = next();
@@ -204,8 +221,60 @@ public class TokenValidator {
     }
 
     private boolean v_if() throws Exception {
-        // if(!peek(0).equals("if")) return false;
-        return false;
+         if(!peek(0).equals("if")) return false;
+         next();
+         v_expr();
+         if(peek(0).equals("do")) {
+             next();
+             return true;
+         }
+
+         assertf(next().equals("{"), "Missing block", "if statement is missing a block after it. You may have forgotten: 'do'. E.g.: 'if true do print(\"test\")'");
+         assertf(has_closing_paren('{', '}'), "Missing curly bracket", "if statement is missing a curly bracket('}')");
+
+        return true;
+    }
+
+    private boolean v_for() throws Exception {
+        if(!peek(0).equals("for")) return false;
+        next();
+
+        if(peek(0).equals("{")) {
+        } else if(!peek(0).equals(";")) {
+            v_stmt();
+            if(peek(0).equals("{")) {
+            } else {
+                v_for_validate_the_rest();
+            }
+        } else {
+            v_for_validate_the_rest();
+        }
+
+        v_block();
+
+        return true;
+    }
+
+    // You cannot have private methods in java, so...
+    private void v_for_validate_the_rest() throws Exception {
+
+        assertf(next().equals(";"), "Missing semicolon", "for loop must have either a semicolon, or a block after the first statement, but it has: '%s'", peek(-1));
+
+        if(!peek(0).equals(";")) v_expr();
+
+        assertf(next().equals(";"), "Missing semicolon", "for loop must have either 0 or 2, but it has 1!");
+        if(!peek(0).equals("{")) v_stmt();
+    }
+
+    private boolean v_block() {
+        if(peek(0).equals("do")) {
+            next();
+            return true;
+        }
+        assertf(peek(0).equals("{"), "Missing curly bracket", "Expected '{' or 'do', instead found '%s'!", peek(0));
+        next();
+        assertf(has_closing_paren('{', '}'), "Missing curly bracket", "A block is missing it's closing curly bracket('}')!");
+        return true;
     }
 
     // TODO: 'in_where' is a bad name
@@ -215,6 +284,9 @@ public class TokenValidator {
         char bad_char = Validator.find_bad_char_in_name(token);
         assertf(bad_char == 0, "Invalid identifier", "Found bad character: '%c' in the " + in_where, bad_char, identifier);
 
+        for(String keyword : SyntaxDefinitions.reserved) {
+            assertf(!token.equals(keyword), "Reserved identifier", "Found reserved identifier: '%s' in the " + in_where + "\nThis word may be used in the language in the future.", identifier, keyword);
+        }
     }
 
     private boolean has_closing_paren(char opening, char closing) {

@@ -9,28 +9,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Fun">
-      <change afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Made progress on TokenValidator">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Declarations.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Error.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Lexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TokenValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TokenValidator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Validator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Validator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Declarations.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Error.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Error.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Lexer$Type.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer$Type.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Lexer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/LexerException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/LexerException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Parser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Parser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/TokenValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TokenValidator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Validator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Validator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/temp.u" beforeDir="false" afterPath="$PROJECT_DIR$/temp.u" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.u" beforeDir="false" afterPath="$PROJECT_DIR$/test.u" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test2.u" beforeDir="false" afterPath="$PROJECT_DIR$/test2.u" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +123,23 @@
       <option name="project" value="LOCAL" />
       <updated>1725287361457</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Fun">
+      <option name="closed" value="true" />
+      <created>1725625185839</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1725625185840</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Made progress on TokenValidator">
+      <option name="closed" value="true" />
+      <created>1725625244145</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1725625244145</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -169,12 +172,14 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Fun" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fun" />
+    <MESSAGE value="Made progress on TokenValidator" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made progress on TokenValidator" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
       <configuration name="JarApplication">
         <watch expression="peek(0)" language="JAVA" />
+        <watch expression="raw_tokens.subList(curr, curr + 5)" language="JAVA" />
       </configuration>
     </watches-manager>
   </component>
