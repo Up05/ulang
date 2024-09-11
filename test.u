@@ -2,8 +2,5 @@
 $insert "test2.u"
 print("B test")
 
-# Parser bug with 'for': if I have: for ;; {, it counts '{' as var
-
-for i : num = 0; i < 5; i = i + 1 {
-    println(i)
-}
+a : [] num = [ 25 25 25 25 ]
+print(a[2])

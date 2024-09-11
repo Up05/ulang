@@ -9,13 +9,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Made progress on TokenValidator">
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Finished the TypeValidator">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Stage.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Error.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Parser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TokenValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TokenValidator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/TypeValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TypeValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Error.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Error.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/TokenValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TokenValidator.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.u" beforeDir="false" afterPath="$PROJECT_DIR$/test.u" afterDir="false" />
     </list>
@@ -139,7 +140,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725625244145</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Finished the TypeValidator">
+      <option name="closed" value="true" />
+      <created>1725977830721</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1725977830721</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -173,14 +182,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Fun" />
     <MESSAGE value="Made progress on TokenValidator" />
-    <option name="LAST_COMMIT_MESSAGE" value="Made progress on TokenValidator" />
-  </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="JarApplication">
-        <watch expression="peek(0)" language="JAVA" />
-        <watch expression="raw_tokens.subList(curr, curr + 5)" language="JAVA" />
-      </configuration>
-    </watches-manager>
+    <MESSAGE value="Finished the TypeValidator" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finished the TypeValidator" />
   </component>
 </project>

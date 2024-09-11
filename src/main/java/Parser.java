@@ -170,8 +170,6 @@ public class Parser {
         return var;
     }
 
-    // Future: private Ast parse_array() throws ParserException { }
-
     private Ast.Const parse_const() {
         if(peek(0).type != Lexer.Type.CONSTANT) return null;
 

@@ -3,34 +3,18 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-public class TokenValidator {
+public class TokenValidator extends Stage<String> {
 
     Stack<Error> error_stack = new Stack<>();
-    ArrayList<String> raw_tokens;
-    int curr = 0;
 
     public TokenValidator(ArrayList<String> raw_tokens, String filename) {
-        this.raw_tokens = raw_tokens;
+        this.tokens = raw_tokens;
         error_stack.push(new Error(Error.Type.COMP, filename));
     }
 
     public void validate() throws Exception {
-        while(curr < raw_tokens.size())
+        while(curr < tokens.size())
             v_stmt();
-    }
-
-    private String peek(int offset) {
-        return raw_tokens.get(curr + offset);
-    }
-    private String next() {
-        return raw_tokens.get(curr ++);
-    }
-    private void skip(int count) {
-        curr += count;
-    }
-    // TODO: rename to something, idk yet
-    private boolean expect(int count) {
-        return curr + count < raw_tokens.size() && curr + count >= 0;
     }
 
     private boolean push_file() {
@@ -44,9 +28,9 @@ public class TokenValidator {
         return false;
     }
     private boolean pop_file() {
-        if (peek(0).equals("EOF")) {
+        if(peek(0).equals("EOF")) {
             next();
-            error_stack.pop();
+            if(!error_stack.isEmpty()) error_stack.pop();
             return true;
         }
         return false;
@@ -60,7 +44,7 @@ public class TokenValidator {
         else return false;
     }
 
-    private static final String[] tokens_to_skip = { "}", ";", "," };
+    private static final String[] tokens_to_skip = { "}", "]", ")", ";", "," };
     private boolean skip_some_tokens() {
         if(Util.array_contains(tokens_to_skip, peek(0))) {
             next();
@@ -86,13 +70,13 @@ public class TokenValidator {
             .bind(this::v_decl)
             .bind(this::v_func_call)
             .bind(this::v_unary_operator)
-            .bind(this::v_var)
             .bind(this::v_const)
+            .bind(this::v_var)
             .bind(this::skip_some_tokens)
             .bind(this::unexpected_token)
             .unwrap();
 
-        if(expect(1)) v_binary_operator();
+        if(are_there(1)) v_binary_operator();
     }
 
     private boolean v_func_decl() throws Exception {
@@ -108,7 +92,7 @@ public class TokenValidator {
             if(peek(0).equals(",")) next();
         }
         next();
-        if(!peek(0).equals("{")) validate_identifier(peek(0), "return type: '%s'!", next());
+        if(!peek(0).equals("{")) v_type();
         assertf(next().equals("{"),             "Missing curly bracket", "Missing block i.e.: '{ ... }' after function: '%s' declaration!", name);
         assertf(has_closing_paren('{', '}'),    "Missing curly bracket", "Missing '}' after function: '%s' declaration!", name);
         return true;
@@ -123,8 +107,8 @@ public class TokenValidator {
 
         if(peek(0).equals(":")) {
             declared_vars.add(name);
-            next(); // kind of out of order, skips ':' when should skip '<type>'
-            validate_identifier(peek(0), "type: '%s'", peek(0));
+            next();
+            v_type();
             next();
         }
 
@@ -147,18 +131,18 @@ public class TokenValidator {
             .bind(this::unexpected_token)
             .unwrap();
 
-        if(expect(1)) v_binary_operator();
+        if(are_there(1)) v_binary_operator();
         return success;
     }
 
     private boolean v_const() {
-        expect(1);
+        are_there(1);
 
         char c = peek(0).charAt(0);
 
         if(Character.isDigit(c)) {
             if(peek(1).equals(".")) {
-                expect(3);
+                are_there(3);
                 assertf(Character.isDigit(peek(2).charAt(0)), "Missing decimal!", "Floating point numbers cannot be written as: '123.' or '.123', you must use: '123.0'!");
                 char decimal_problem = Validator.find_bad_char_in_number(peek(2));
                 assertf(decimal_problem == 0, "Invalid number", "Found bad symbol: '%c' in the decimal place of: '%s'", decimal_problem, peek(0) + peek(1) + peek(2));
@@ -181,7 +165,27 @@ public class TokenValidator {
             return true;
         }
 
+        if(peek(0).equals("[")) {
+            next();
+            assertf(has_closing_paren('[', ']'), "Missing ']'", "Found an array index/initialization, that is missing: ']'!");
+            return true;
+        }
+
         return false;
+    }
+
+    private boolean v_type() {
+        if(peek(0).equals("[")) {
+            next();
+            if(peek(0).equals("map")) {
+                System.out.println("[WARNING] maps are NYI! Do not use [map] <type> <type> for now.");
+                next();
+            }
+            assertf(next().equals("]"), "Missing ']'", "Array type syntax needs both '[' and ']'. Missing: ']'!");
+            return true;
+        }
+        validate_identifier(peek(0), "type: '%s'", next());
+        return true;
     }
 
     private boolean v_var() {
@@ -212,12 +216,11 @@ public class TokenValidator {
         return true;
     }
 
-    private boolean v_binary_operator() throws Exception {
-        if(!Util.array_contains(SyntaxDefinitions.binary_operators, peek(0))) return false;
-        assertf(expect(-1), "Missing expression", "Binary operator: '%s' is missing it's left hand side expression, since it is at the very start of a file!", peek(0));
+    private void v_binary_operator() throws Exception {
+        if(!Util.array_contains(SyntaxDefinitions.binary_operators, peek(0))) return;
+        assertf(are_there(-1), "Missing expression", "Binary operator: '%s' is missing it's left hand side expression, since it is at the very start of a file!", peek(0));
         next();
         v_expr();
-        return true;
     }
 
     private boolean v_if() throws Exception {
@@ -239,16 +242,10 @@ public class TokenValidator {
         if(!peek(0).equals("for")) return false;
         next();
 
-        if(peek(0).equals("{")) {
-        } else if(!peek(0).equals(";")) {
+        if(!peek(0).equals(";")) {
             v_stmt();
-            if(peek(0).equals("{")) {
-            } else {
-                v_for_validate_the_rest();
-            }
-        } else {
-            v_for_validate_the_rest();
-        }
+            if(!peek(0).equals("{")) v_for_validate_the_rest();
+        } else v_for_validate_the_rest();
 
         v_block();
 
@@ -273,7 +270,7 @@ public class TokenValidator {
         }
         assertf(peek(0).equals("{"), "Missing curly bracket", "Expected '{' or 'do', instead found '%s'!", peek(0));
         next();
-        assertf(has_closing_paren('{', '}'), "Missing curly bracket", "A block is missing it's closing curly bracket('}')!");
+        assertf(has_closing_paren('{', '}'), "Missing curly bracket", "A block is missing it's closing curly bracket ('}')!");
         return true;
     }
 
@@ -291,12 +288,13 @@ public class TokenValidator {
 
     private boolean has_closing_paren(char opening, char closing) {
         int level = 1;
-        for(int i = 0; i + curr < raw_tokens.size(); i ++) {
+        for(int i = 0; i + curr < tokens.size(); i ++) {
+            // if(are_there(0)) return false;
+            if(level == 0) break;
             if(peek(i).charAt(0) == opening) level ++;
             else if(peek(i).charAt(0) == closing) level --;
         }
-        if(level > 0) return false;
-        return true;
+        return level <= 0;
     }
     // I should validate parens with Stack<Character> or whatever like that, e.g.: [ '(', '{' ] + '}' -> [ '(' ]; [ '(', '{' ] + ')' -> error: mismatched parens
 
