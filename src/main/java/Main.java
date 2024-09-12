@@ -51,7 +51,7 @@ public class Main {
         
         ArrayList<String> prepped_tokens = Preprocessor.preprocess(base, in_file.toString());
 
-        String[] raw_tokens = prepped_tokens.toArray(new String[prepped_tokens.size()]);
+        ArrayList<String> raw_tokens = prepped_tokens;
 
 
         System.out.println("---".repeat(24));
@@ -65,8 +65,9 @@ public class Main {
 
         ArrayList<Token> tokens = new Lexer(raw_tokens, in_file.getFileName().toString()).lex();
         Debug.print_lexed_tokens(tokens);
-        System.out.println("---".repeat(24));
-        new Validator().validate(tokens, in_file.getFileName().toString());
+
+        // System.out.println("---".repeat(24));
+        // new Validator().validate(tokens, in_file.getFileName().toString());
 
         Ast ast = new Parser(tokens, in_file.getFileName().toString()).parse();
 

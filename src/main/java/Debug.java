@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class Debug {
 
-    public static void print_tokens(String[] tokens) {
+    public static void print_tokens(ArrayList<String> tokens) {
         // int max_length = 0;
         // for(String t : tokens) if(t.length() > max_length) max_length = t.length();
         // System.out.printf("count: %d, max len: %d\n", tokens.length, max_length);

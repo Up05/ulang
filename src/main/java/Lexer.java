@@ -18,9 +18,8 @@ class LexerException extends Exception {
     }
 }
 
-public class Lexer {
+public class Lexer extends Stage<String> {
     enum Type {
-        UNKNOWN,
         INFORMATIONAL,
         SYMBOL,
 
@@ -37,49 +36,19 @@ public class Lexer {
         FUNCTION_DECL,
         FUNCTION_CALL,
 
-        KEYWORD;
-
-        public boolean is_any(Type... types) {
-            for(Type t : types)
-                if(this == t) return true;
-            return false;
-        }
+        KEYWORD
     }
 
-    public static boolean could_be_expr(Token token) {
-        return token.type.is_any(Type.CONSTANT, Type.VARIABLE, Type.FUNCTION_CALL, Type.UNARY_OPERATOR) || token.is("(");
-    }
+    private final HashSet<String> declared_vars = new HashSet<>();
+    private ArrayList<Token> lexed_tokens = new ArrayList<>();
 
-    // for init; loop start; loop end do loop middle
+    private Stack<Error> error_stack = new Stack<>(); // I don't think, that I use this anywhere and I shouldn't either way
 
-    LexerException potential_exception = new LexerException("", "", 0);
-    private HashSet<String> declared_vars = new HashSet<>();
-    private String[] raw_tokens;
-    private ArrayList<Token> tokens = new ArrayList<>();
-    int current_token = 0;
-
-    private Stack<Error> error_stack = new Stack<>();
-
-    public Lexer(String[] raw_tokens, String filename) {
-        // potential_exception.file = filename;
-        // potential_exception.line = 1;
-        this.raw_tokens = raw_tokens;
+    public Lexer(ArrayList<String> raw_tokens, String filename) {
+        this.tokens = raw_tokens;
         error_stack.push(new Error(Error.Type.COMP, filename));
     }
 
-    private String peek(int offset) {
-        return raw_tokens[current_token + offset];
-    }
-
-    private String next() {
-        return raw_tokens[current_token ++];
-    }
-    private void skip(int count) {
-        current_token += count;
-    }
-    private boolean has(int count) {
-        return current_token + count < raw_tokens.length;
-    }
     private boolean EOF() {
         return peek(0).equals("EOF");
     }
@@ -87,7 +56,7 @@ public class Lexer {
     // unnecessary work, but the parser should become simpler
     public ArrayList<Token> lex() throws Exception {
 
-        while(current_token < raw_tokens.length) {
+        while(curr < tokens.size()) {
             if (EOF()) {
                 error_stack.pop();
                 next();
@@ -97,7 +66,7 @@ public class Lexer {
             if (peek(0).equals("\n")) {
                 // potential_exception.line++;
                 error_stack.peek().line ++;
-                tokens.add(new Token(peek(0), Type.INFORMATIONAL));
+                lexed_tokens.add(new Token(peek(0), Type.INFORMATIONAL));
                 next();
             }
 
@@ -119,8 +88,8 @@ public class Lexer {
                 .unwrap();
 
         }
-        tokens.add(new Token(raw_tokens[raw_tokens.length - 1], Type.INFORMATIONAL)); // 'EOF'
-        return tokens;
+        lexed_tokens.add(new Token(tokens.get(tokens.size() - 1), Type.INFORMATIONAL)); // 'EOF'
+        return lexed_tokens;
     }
 
     private boolean lexer_skip_bad() {
@@ -143,64 +112,52 @@ public class Lexer {
 
     private boolean lex_keyword() {
         if(Util.array_contains(SyntaxDefinitions.keywords, peek(0)))
-            return tokens.add(new Token(next(), Type.KEYWORD));
+            return lexed_tokens.add(new Token(next(), Type.KEYWORD));
         return false;
     }
     private boolean lex_info() {
         if(Util.array_contains(SyntaxDefinitions.informational, peek(0)))
-            return tokens.add(new Token(next(), Type.INFORMATIONAL));
+            return lexed_tokens.add(new Token(next(), Type.INFORMATIONAL));
         return false;
     }
     private boolean lex_delim() {
         if(Util.array_contains(SyntaxDefinitions.delimiters, peek(0)))
-            return tokens.add(new Token(next(), Type.SYMBOL));
+            return lexed_tokens.add(new Token(next(), Type.SYMBOL));
         return false;
     }
-    // lex const
-    private boolean lex_return_type() {
-        if (has(2) && peek(0).equals("-") && peek(1).equals(">")) {
-            tokens.add(new Token(peek(2), Type.TYPE));
-            skip(3);
-            return true;
-        }
-        return false;
-    }
-    // lex operator
     private boolean lex_func_decl() {
         if(peek(0).equals("func")) {
-            tokens.add(new Token(peek(1), Type.FUNCTION_DECL));
+            lexed_tokens.add(new Token(peek(1), Type.FUNCTION_DECL));
             skip(2);
             return true;
         }
         return false;
     }
     private boolean lex_func_call() {
-        if(has(2) && peek(1).equals("(")) {
-            tokens.add(new Token(next(), Type.FUNCTION_CALL));
+        if(are_there(2) && peek(1).equals("(")) {
+            lexed_tokens.add(new Token(next(), Type.FUNCTION_CALL));
             return true;
         }
         return false;
     }
-
     private boolean lex_var() {
         boolean is_var =
             declared_vars.contains(peek(0)) ||
-            has(2) && peek(1).equals(":") || peek(1).equals("=");
+            are_there(2) && peek(1).equals(":") || peek(1).equals("=");
         if(!is_var) return false;
 
         declared_vars.add(peek(0));
-        tokens.add(new Token(next(), Type.VARIABLE)); // <name>
+        lexed_tokens.add(new Token(next(), Type.VARIABLE)); // <name>
 
         if(peek(0).equals(":")) { // For declaration
             next();
             lex_type();
         } else if(peek(0).equals("[")) { // For usage
-            tokens.add(new Token("[", Type.CONTAINER_INDEX));
+            lexed_tokens.add(new Token("[", Type.CONTAINER_INDEX));
             next();
         }
         return true;
     }
-
     private boolean lex_type() {
 
         if(peek(0).equals("[")) {
@@ -208,26 +165,25 @@ public class Lexer {
             if(peek(0).equals("]")) { // declarations, e.g.: a : [] num
                 next();
                 if(!SyntaxDefinitions.types.containsKey(peek(0))) { skip(-2); return false; }
-                tokens.add(new Token("array", Type.TYPE));
-                tokens.add(new Token(next(), Type.TYPE));
+                lexed_tokens.add(new Token("array", Type.TYPE));
+                lexed_tokens.add(new Token(next(), Type.TYPE));
             } else if(peek(0).equals("map")) { // maps, e.g.: a : [map] string num
-                tokens.add(new Token("map", Type.TYPE));
+                lexed_tokens.add(new Token("map", Type.TYPE));
                 // assert skip + 4 == ']'
                 next(); // skips ']'
-                tokens.add(new Token(next(), Type.TYPE));
-                tokens.add(new Token(next(), Type.TYPE));
+                lexed_tokens.add(new Token(next(), Type.TYPE));
+                lexed_tokens.add(new Token(next(), Type.TYPE));
             } else {
                 skip(-1);
                 return false;
             }
             return true;
         } else if(SyntaxDefinitions.types.containsKey(peek(0))) {
-            tokens.add(new Token(next(), Type.TYPE));
+            lexed_tokens.add(new Token(next(), Type.TYPE));
             return true;
         }
         return false;
     }
-
     private boolean is_const(String token) {
         char first = token.charAt(0);
         return
@@ -237,42 +193,40 @@ public class Lexer {
     }
     private boolean lex_const() {
         if(!is_const(peek(0))) return false;
-        if(has(3) && peek(1).equals(".") && is_const(peek(2))) {
+        if(are_there(3) && peek(1).equals(".") && is_const(peek(2))) {
             // The one copy... ಥ_ಥ  // Half a month later: not anymore ¯\_(ツ)_/¯
-            tokens.add(new Token(next() + next() + next(), Type.CONSTANT));
+            lexed_tokens.add(new Token(next() + next() + next(), Type.CONSTANT));
         } else
-            tokens.add(new Token(next(), Type.CONSTANT));
+            lexed_tokens.add(new Token(next(), Type.CONSTANT));
         return true;
     }
-
     private boolean lex_operator() {
         int unary = matching_operator_chars(SyntaxDefinitions.unary_operators),
             binary = matching_operator_chars(SyntaxDefinitions.binary_operators);
 
         if(unary > 0 && binary > 0) { // ambiguous
-            if(tokens.isEmpty()) {
-                tokens.add(new Token(concat_tokens(unary), Type.UNARY_OPERATOR));
+            if(lexed_tokens.isEmpty()) {
+                lexed_tokens.add(new Token(concat_tokens(unary), Type.UNARY_OPERATOR));
                 return true;
             }
 
-            Type prev_token = tokens.get(tokens.size() - 1).type;
+            Type prev_token = lexed_tokens.get(lexed_tokens.size() - 1).type;
             if(Util.array_contains(SyntaxDefinitions.tokens_potentially_before_binary_operator, prev_token)) {
-                tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
+                lexed_tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
                 return true;
             }
         }
 
         if(unary > 0) {
-            tokens.add(new Token(concat_tokens(unary), Type.UNARY_OPERATOR));
+            lexed_tokens.add(new Token(concat_tokens(unary), Type.UNARY_OPERATOR));
         } else if(binary > 0) {
-            tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
+            lexed_tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
         } else return false;
         return true;
     }
-
     private boolean lex_list() {
         if(peek(0).equals("["))
-            return tokens.add(new Token(next(), Type.CONTAINER));
+            return lexed_tokens.add(new Token(next(), Type.CONTAINER));
         return false;
     }
 
@@ -295,21 +249,6 @@ public class Lexer {
         for(; amount > 0; amount --)
             b.append(next());
         return b.toString();
-    }
-
-    // I swear, I've written and deleted this function > 5 times by now...
-    private boolean looks_like_variable(String t) {
-        if(Character.isDigit(t.charAt(0))) return false;
-        for(char r : t.toCharArray())
-            if(!Character.isLetterOrDigit(r) && r != '_') return false;
-        return true;
-    }
-
-
-    private void assertf(boolean expr, String format, Object... values) throws LexerException {
-        if(expr) return;
-        potential_exception.message = String.format(format, values) + "\n";
-        throw potential_exception;
     }
 
     public static int get_precedence(Token t) {

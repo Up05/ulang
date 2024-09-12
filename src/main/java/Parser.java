@@ -19,21 +19,13 @@ class ParserException extends Exception {
 }
 
 
-public class Parser {
+public class Parser extends Stage<Token> {
     // t -- current token
 
     ParserException potentialException = new ParserException("", "", 0);
-    private static class ResultDEPRECATED {
-        Ast ast;
-        int skip;
-        boolean ok = false;
 
-        ResultDEPRECATED() { }
-        ResultDEPRECATED(Ast ast, int skip) { ok = true; this.ast = ast; this.skip = skip; }
-    }
-
-    private ArrayList<Token> tokens;
-    private int current_token = 0;
+    // private ArrayList<Token> tokens;
+    // private int curr = 0;
 
     public Parser(ArrayList<Token> tokens, String filename) {
         this.tokens = tokens;
@@ -43,7 +35,7 @@ public class Parser {
     public Ast parse() throws Exception {
         Ast.Root root = new Ast.Root();
 
-        while(current_token < tokens.size()) {
+        while(curr < tokens.size()) {
 
             if(peek(0).is("\n")) potentialException.line ++;
             if(peek(0).type == Lexer.Type.INFORMATIONAL) {
@@ -60,24 +52,10 @@ public class Parser {
                 .unwrap();
             if(node != null) root.children.add(node);
 
-            current_token ++; // shouldn't need this eventually...
+            curr++; // shouldn't need this eventually...
         }
 
         return root;
-    }
-
-    private Token next() {
-        // if(current_token >= tokens.size()) return null;
-        return tokens.get(current_token ++);
-    }
-
-    private Token peek(int o) {
-        // if(current_token + o >= tokens.size()) return null;
-        return tokens.get(current_token + o);
-    }
-
-    private boolean has(int count) {
-        return current_token + count < tokens.size();
     }
 
     private int paren_level = 0;
@@ -118,7 +96,7 @@ public class Parser {
 
     private Ast.Decl parse_decl() throws ParserException {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
-        if(current_token + 1 >= tokens.size()) return null;
+        if(curr + 1 >= tokens.size()) return null;
         if(peek(1).type != Lexer.Type.TYPE) return null;
         Ast.Decl node = new Ast.Decl();
 
@@ -151,7 +129,7 @@ public class Parser {
 
     private Ast.Assign parse_assign() throws ParserException {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
-        if(current_token + 1 >= tokens.size()) return null;
+        if(curr + 1 >= tokens.size()) return null;
         if(!peek(1).is("=")) return null;
         Ast.Assign node = new Ast.Assign();
 
@@ -324,12 +302,12 @@ public class Parser {
     private List<Ast> parse_block() throws ParserException {
         List<Ast> block = new ArrayList<>();
         Token start = next();
-        while(current_token < tokens.size() && !peek(0).is("}")) {
+        while(curr < tokens.size() && !peek(0).is("}")) {
             Ast node = parse_expr();
             if(node != null) block.add(node);
-            if(has(1) && start.is("do") && (peek(0).type == Lexer.Type.INFORMATIONAL || peek(0).is(";"))) break;
+            if(are_there(1) && start.is("do") && (peek(0).type == Lexer.Type.INFORMATIONAL || peek(0).is(";"))) break;
         }
-        if(start.is("{") && has(1)) next(); // skips '}'
+        if(start.is("{") && are_there(1)) next(); // skips '}'
         return block;
     }
 
@@ -357,7 +335,7 @@ public class Parser {
         return array;
     }
 
-
+    // TODO: Remove. But first, finish* TypeValidator
     private void assertf(boolean expr, String format, Object... values) throws ParserException {
         if(expr) return;
         potentialException.message = String.format(format, values) + "\n";
