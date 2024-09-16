@@ -9,17 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Added more to TypeValidator">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Debug.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Debug.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Lexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Stage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Stage.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Parser$ResultDEPRECATED.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Parser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Parser.class" afterDir="false" />
-    </list>
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Ported more things to Stage" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -156,7 +146,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726075579497</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Ported more things to Stage">
+      <option name="closed" value="true" />
+      <created>1726162788034</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1726162788034</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -192,6 +190,7 @@
     <MESSAGE value="Made progress on TokenValidator" />
     <MESSAGE value="Finished the TypeValidator" />
     <MESSAGE value="Added more to TypeValidator" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added more to TypeValidator" />
+    <MESSAGE value="Ported more things to Stage" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ported more things to Stage" />
   </component>
 </project>
