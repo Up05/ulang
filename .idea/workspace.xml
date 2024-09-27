@@ -9,7 +9,45 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Ported more things to Stage" />
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="I guess, I did some other things...">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Ast.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Ast.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Debug.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Debug.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Lexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/TypeValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TypeValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Array.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Array.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Assign.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Assign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$BinOp.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$BinOp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Const.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Const.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Decl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Decl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$FnDecl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$FnDecl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$For.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$For.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Func.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Func.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$If.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$If.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Key.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Key.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Ret.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Ret.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Root.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Root.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Table.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Table.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$UnaOp.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$UnaOp.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast$Var.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast$Var.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Ast.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Ast.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Debug.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Debug.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Declarations$Func.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Declarations$JavaFunc.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Declarations$Var.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Lexer$Type.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer$Type.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Lexer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Parser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Parser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ParserException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ParserException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.u" beforeDir="false" afterPath="$PROJECT_DIR$/test.u" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -154,7 +192,15 @@
       <option name="project" value="LOCAL" />
       <updated>1726162788034</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="I guess, I did some other things...">
+      <option name="closed" value="true" />
+      <created>1726501778452</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1726501778452</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -191,6 +237,14 @@
     <MESSAGE value="Finished the TypeValidator" />
     <MESSAGE value="Added more to TypeValidator" />
     <MESSAGE value="Ported more things to Stage" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ported more things to Stage" />
+    <MESSAGE value="I guess, I did some other things..." />
+    <option name="LAST_COMMIT_MESSAGE" value="I guess, I did some other things..." />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="JarApplication">
+        <watch expression="peek(0).token" language="JAVA" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

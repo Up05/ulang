@@ -1,6 +1,6 @@
 # print("A test")
 $insert "test2.u"
-print("B test")
-
-a : [] num = [ 25 25 25 25 ]
+# print("B test")
+b : num = 55
+a : [] num = [ 25 + b 25 25 25 ]
 print(a[2])

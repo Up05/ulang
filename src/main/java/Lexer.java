@@ -21,6 +21,7 @@ class LexerException extends Exception {
 public class Lexer extends Stage<String> {
     enum Type {
         INFORMATIONAL,
+        INSERTED_FILE,
         SYMBOL,
 
         CONTAINER,
@@ -36,7 +37,8 @@ public class Lexer extends Stage<String> {
         FUNCTION_DECL,
         FUNCTION_CALL,
 
-        KEYWORD
+        KEYWORD,
+
     }
 
     private final HashSet<String> declared_vars = new HashSet<>();
@@ -97,19 +99,18 @@ public class Lexer extends Stage<String> {
         skip(1);
         return false;
     }
-    
-    // TODO: Append tokens for parser to do too
     private Boolean lex_preproc() {
         if(!peek(0).equals("$")) return false;
         next();
         if(peek(0).equals("push")) {
             next();
-            error_stack.push(new Error(Error.Type.COMP, next().substring(1, peek(-1).length() - 1)));
+            String name = next().substring(1, peek(-1).length() - 1);
+            lexed_tokens.add(new Token(name, Type.INSERTED_FILE));
+            error_stack.push(new Error(Error.Type.COMP, name));
             return true;
         }
         return false;
     }
-
     private boolean lex_keyword() {
         if(Util.array_contains(SyntaxDefinitions.keywords, peek(0)))
             return lexed_tokens.add(new Token(next(), Type.KEYWORD));

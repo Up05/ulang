@@ -80,12 +80,14 @@ public class Debug {
             for(Ast element : node.values) b.append(zip(element));
         }
         case Ast.Decl node -> {
-            b.append(node.name).append(": ").append(node.type.getSimpleName());
+            // b.append(node.name).append(": ").append(node.type.getSimpleName());
+            b.append(node.name).append(": ").append(node.typename);
             b.append(zip(node.value));
         }
         case Ast.FnDecl node -> {
             if(node.ret == null) b.append(node.name);
-            else b.append(node.name).append(" -> ").append(node.ret.getSimpleName());
+            // else b.append(node.name).append(" -> ").append(node.ret.getSimpleName());
+            else b.append(node.name).append(" -> ").append(node.ret_typename);
             for(Ast arg   : node.args) b.append(zip(arg));
             for(Ast child : node.body) b.append(zip(child));
         }
@@ -108,7 +110,8 @@ public class Debug {
             b.append("return").append(zip(node.expr));
         }
 
-        case Ast.Const node -> b.append(node.value).append(": ").append(node.value.getClass().getSimpleName());
+        // case Ast.Const node -> b.append(node.value).append(": ").append(node.value.getClass().getSimpleName());
+        case Ast.Const node -> b.append(node.value).append(": ").append(node.typename);
         case Ast.Var node -> b.append('$').append(node.name);
         default -> throw new IllegalStateException("Unexpected value: " + ast);
         }

@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 class ParserException extends Exception {
     String message, file;
@@ -24,26 +25,53 @@ public class Parser extends Stage<Token> {
 
     ParserException potentialException = new ParserException("", "", 0);
 
-    // private ArrayList<Token> tokens;
-    // private int curr = 0;
+    Stack<Error> error_stack = new Stack<>();
+    // I am fighting Java here. But the alternative is: polluting Ast.java with constructors.
+    static <T extends Ast> T make(Class<T> type, Error error) {
+        try {
+            T ast = type.getDeclaredConstructor().newInstance();
+            ast.error = error;
+            return ast;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+            return null;
+        }
+    }
+
+    Token next() {
+        Token t = super.next();
+
+        if(are_there(0)) {
+            if(peek(0).type == Lexer.Type.INSERTED_FILE) {
+                error_stack.push(new Error(Error.Type.TYPE, peek(0).token));
+            } else if(peek(0).is("EOF")) {
+                error_stack.pop();
+            } else if(peek(0).is("\n")) {
+                error_stack.peek().line ++;
+            }
+        }
+
+        return t;
+    }
 
     public Parser(ArrayList<Token> tokens, String filename) {
         this.tokens = tokens;
+        error_stack.push(new Error(Error.Type.TYPE, filename));
         potentialException.file = filename;
     }
 
     public Ast parse() throws Exception {
-        Ast.Root root = new Ast.Root();
+        Ast.Root root = make(Ast.Root.class, error_stack.peek());
 
         while(curr < tokens.size()) {
 
-            if(peek(0).is("\n")) potentialException.line ++;
             if(peek(0).type == Lexer.Type.INFORMATIONAL) {
                 if(next() == null) break;
                 continue;
             }
             Ast node = null;
-            node = new Monad<>(node, null) // This is just kind of repeating, not fully, but still
+            node = new Monad<>(node, null) // This isn't actually "always null"
                 .bind(this::parse_func_decl)
                 .bind(this::parse_decl)
                 .bind(this::parse_for)
@@ -98,18 +126,23 @@ public class Parser extends Stage<Token> {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
         if(curr + 1 >= tokens.size()) return null;
         if(peek(1).type != Lexer.Type.TYPE) return null;
-        Ast.Decl node = new Ast.Decl();
+        Ast.Decl node = make(Ast.Decl.class, error_stack.peek());
+
 
         node.name = next().token;
 
+
         if(peek(0).token.equals("array")) {
-            next(); next(); // Yes, currently, arrays are heterogeneous, this is mainly for the potential compiler
+            next(); // Technically, arrays are heterogeneous. I'll deal with that at validation & runtime
             node.type = List.class;
+            node.typename = "[] " + next().token;
         } else if (peek(0).token.equals("map")) {
+            // ! NYI
             next(); next(); next();
             node.type = Map.class;
         } else {
-            node.type = SyntaxDefinitions.types.get(next().token);
+            node.type = SyntaxDefinitions.types.get(peek(0).token);
+            node.typename = next().token;
         }
         assertf(node.type != null, "Invalid type: '%s' found!", peek(0).token);
 
@@ -122,6 +155,9 @@ public class Parser extends Stage<Token> {
         Ast expr = parse_binary_op(-1);
         assertf(expr != null, "Failed to parse expression '%s' in variable assignment!", peek(0).token);
 
+        if(node.typename.startsWith("[]"))
+            ((Ast.Array) expr).typename = node.typename;
+
         node.value = expr;
 
         return node;
@@ -131,7 +167,7 @@ public class Parser extends Stage<Token> {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
         if(curr + 1 >= tokens.size()) return null;
         if(!peek(1).is("=")) return null;
-        Ast.Assign node = new Ast.Assign();
+        Ast.Assign node = make(Ast.Assign.class, error_stack.peek());
 
         node.name = next().token;
         next();
@@ -143,7 +179,7 @@ public class Parser extends Stage<Token> {
 
     private Ast.Var parse_var() throws ParserException {
         // TODO: I guess, check if declared & (maybe not a keyword)
-        Ast.Var var = new Ast.Var();
+        Ast.Var var = make(Ast.Var.class, error_stack.peek());
         var.name = next().token;
         return var;
     }
@@ -152,20 +188,24 @@ public class Parser extends Stage<Token> {
         if(peek(0).type != Lexer.Type.CONSTANT) return null;
 
         String t = next().token;
-        Ast.Const c = new Ast.Const();
+        Ast.Const node = make(Ast.Const.class, error_stack.peek());
 
-        if(Character.isDigit(t.charAt(0)))
-            c.value = Double.parseDouble(t);
-        else if(t.startsWith("'") || t.startsWith("\""))
-            c.value = t.substring(1, t.length() - 1);
-        else // if(t.equals("true") || t.equals("false"))
-            c.value = t.equals("true");
-        return c;
+        if(Character.isDigit(t.charAt(0))) {
+            node.value = Double.parseDouble(t);
+            node.typename = "num"; // this sucks
+        } else if(t.startsWith("'") || t.startsWith("\"")) {
+            node.value = t.substring(1, t.length() - 1);
+            node.typename = "string";
+        } else { // if(t.equals("true") || t.equals("false"))
+            node.value = t.equals("true");
+            node.typename = "bool";
+        }
+        return node;
     }
 
     private Ast.UnaOp parse_unary_op() throws ParserException {
         if(peek(0).type != Lexer.Type.UNARY_OPERATOR) return null;
-        Ast.UnaOp node = new Ast.UnaOp();
+        Ast.UnaOp node = make(Ast.UnaOp.class, error_stack.peek());
 
         node.name = next().token;
         Ast expr = parse_expr();
@@ -194,7 +234,7 @@ public class Parser extends Stage<Token> {
     private Ast parse_increasing_precedence(Ast left, int min_prec) throws ParserException {
         // skip_parens();
         Token next = peek(0);
-        Ast.BinOp node = new Ast.BinOp();
+        Ast.BinOp node = make(Ast.BinOp.class, error_stack.peek());
 
         if(next == null || next.type != Lexer.Type.BINARY_OPERATOR) return left;
 
@@ -212,7 +252,7 @@ public class Parser extends Stage<Token> {
 
     private Ast.Func parse_func() throws ParserException {
         if(peek(0).type != Lexer.Type.FUNCTION_CALL) return null;
-        Ast.Func node = new Ast.Func();
+        Ast.Func node = make(Ast.Func.class, error_stack.peek());
         node.name = next().token;
         ArrayList<Ast> args = new ArrayList<>();
         next(); // skips '('
@@ -228,7 +268,7 @@ public class Parser extends Stage<Token> {
 
     private Ast.FnDecl parse_func_decl() throws ParserException {
         if(peek(0).type != Lexer.Type.FUNCTION_DECL) return null;
-        Ast.FnDecl node = new Ast.FnDecl();
+        Ast.FnDecl node = make(Ast.FnDecl.class, error_stack.peek());
         node.name = next().token;
         node.args = new ArrayList<>();
         node.body = new ArrayList<>();
@@ -242,7 +282,8 @@ public class Parser extends Stage<Token> {
         next(); // skips ')'
 
         if(peek(0).type == Lexer.Type.TYPE) {
-            node.ret = SyntaxDefinitions.types.get(next().token);
+            node.ret = SyntaxDefinitions.types.get(peek(0).token);
+            node.ret_typename = next().token;
         }
 
         node.body = parse_block();
@@ -252,7 +293,7 @@ public class Parser extends Stage<Token> {
     private Ast.For parse_for() throws ParserException {
         if(!peek(0).is("for")) return null;
         next();
-        Ast.For node = new Ast.For();
+        Ast.For node = make(Ast.For.class, error_stack.peek());
         node.body = new ArrayList<>();
         if(!peek(0).is("{") && !peek(0).is("do")) node.pre = parse_expr();
         if(peek(0).is(";")) {
@@ -271,7 +312,7 @@ public class Parser extends Stage<Token> {
                 node.cond = node.pre;
                 node.pre = null;
             } else {
-                Ast.Const bool = new Ast.Const();
+                Ast.Const bool = make(Ast.Const.class, error_stack.peek());
                 bool.value = true;
                 node.cond = bool;
             }
@@ -285,7 +326,7 @@ public class Parser extends Stage<Token> {
     private Ast.If parse_if() throws ParserException {
         if(!peek(0).is("if")) return null;
         next();
-        Ast.If node = new Ast.If();
+        Ast.If node = make(Ast.If.class, error_stack.peek());
         node.cond = parse_binary_op(-1);
         node.body = parse_block();
         return node;
@@ -294,7 +335,7 @@ public class Parser extends Stage<Token> {
     private Ast.Ret parse_return() throws  ParserException {
         if(!peek(0).is("return")) return null;
         next();
-        Ast.Ret node = new Ast.Ret();
+        Ast.Ret node = make(Ast.Ret.class, error_stack.peek());
         node.expr = parse_binary_op(-1);
         return node;
     }
@@ -314,7 +355,7 @@ public class Parser extends Stage<Token> {
     // This should be a binary operator, but I currently do not have logic for consuming ']'
     private Ast.Key parse_access() throws ParserException {
         if(peek(1).type != Lexer.Type.CONTAINER_INDEX) return null;
-        Ast.Key node = new Ast.Key();
+        Ast.Key node = make(Ast.Key.class, error_stack.peek());
         node.array = parse_var();
         next(); // skips '['
         node.index = parse_binary_op(-1);
@@ -324,7 +365,7 @@ public class Parser extends Stage<Token> {
 
     private Ast.Array parse_array() throws ParserException {
         if(peek(0).type != Lexer.Type.CONTAINER) return null;
-        Ast.Array array = new Ast.Array();
+        Ast.Array array = make(Ast.Array.class, error_stack.peek());
         array.values = new ArrayList<>();
         next(); /// skips '['
         while(!peek(0).is("]")) {

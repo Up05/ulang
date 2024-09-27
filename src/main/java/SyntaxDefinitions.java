@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Map;
 
 public class SyntaxDefinitions {
@@ -27,10 +28,50 @@ public class SyntaxDefinitions {
         { "." }
     };
 
-    static Map<String, Class> types = Map.of (
-        "bool", Boolean.class,
-        "num",  Double.class,
-        "char", Character.class,
-        "string", String.class
+    // This is basically just to not make very many string copies... If I had more types, this should, probably, be an enum
+    static final String TYPE_NUMBER  = "num";
+    static final String TYPE_BOOLEAN = "bool";
+    static final String TYPE_STRING  = "string";
+    static final String TYPE_CHAR    = "char";
+
+    static Map<String, Class> types = Map.of(
+        TYPE_NUMBER,  Double.class,
+        TYPE_BOOLEAN, Boolean.class,
+        TYPE_STRING,  String.class,
+        TYPE_CHAR,    Character.class
     );
+
+    static class OperatorTypeData {
+        String out, lhs, rhs;
+    }
+    static private OperatorTypeData entype_operator(String out, String lhs, String rhs) {
+        OperatorTypeData data = new OperatorTypeData();
+        data.lhs = lhs;
+        data.rhs = rhs;
+        data.out = out;
+        return data;
+    }
+    static private OperatorTypeData entype_operator(String out, String rhs) { return entype_operator(out, null, rhs); }
+    static Map<String, OperatorTypeData> unary_types = Map.of(
+        "+", entype_operator(TYPE_NUMBER, TYPE_NUMBER),
+        "-", entype_operator(TYPE_NUMBER, TYPE_NUMBER),
+        "!", entype_operator(TYPE_BOOLEAN, TYPE_BOOLEAN)
+    );
+
+    static HashMap<String, OperatorTypeData> binary_types = new HashMap<>();
+    static {
+        binary_types.put("+", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put("-", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put("*", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put("/", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put("%", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
+
+        binary_types.put("||", entype_operator(TYPE_BOOLEAN, TYPE_BOOLEAN, TYPE_BOOLEAN));
+        binary_types.put("&&", entype_operator(TYPE_BOOLEAN, TYPE_BOOLEAN, TYPE_BOOLEAN));
+
+        binary_types.put(">",  entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put("<",  entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put(">=", entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
+        binary_types.put("<=", entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
+    }
 }

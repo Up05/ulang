@@ -73,6 +73,8 @@ public class Main {
 
         Debug.send_ast_to_vis(ast);
 
+        new TypeValidator().validate(ast);
+
         Interpreter interpreter = new Interpreter((Ast.Root) ast);
         interpreter.interpret(ast);
 
@@ -96,6 +98,7 @@ public class Main {
 * CompileException and RuntimeException ???
 * Better interface for declared types
 * Calculate lines correctly (for errors in parser) Maybe just put line thing in next()?
+* Check array type at runtime when using [] & append
 *
 * Future: switch blocks
 */
