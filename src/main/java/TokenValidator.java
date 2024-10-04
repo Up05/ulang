@@ -76,6 +76,7 @@ public class TokenValidator extends Stage<String> {
             .bind(this::unexpected_token)
             .unwrap();
 
+        if(are_there(1)) v_access();
         if(are_there(1)) v_binary_operator();
     }
 
@@ -128,9 +129,11 @@ public class TokenValidator extends Stage<String> {
             .bind(this::v_unary_operator)
             .bind(this::v_var)
             .bind(this::skip_some_tokens)
-            .bind(this::unexpected_token)
+            // .bind(this::unexpected_token)
             .unwrap();
 
+
+        if(are_there(1)) v_access();
         if(are_there(1)) v_binary_operator();
         return success;
     }
@@ -210,16 +213,18 @@ public class TokenValidator extends Stage<String> {
     }
 
     private boolean v_unary_operator() throws Exception {
-        if(!Util.array_contains(SyntaxDefinitions.unary_operators, peek(0))) return false;
-        next();
+        int unary = matching_operator_chars(SyntaxDefinitions.unary_operators);
+        if(unary == 0) return false;
+        skip(unary + 1);
         v_expr();
         return true;
     }
 
     private void v_binary_operator() throws Exception {
-        if(!Util.array_contains(SyntaxDefinitions.binary_operators, peek(0))) return;
+        int binary = matching_operator_chars(SyntaxDefinitions.binary_operators);
+        if(binary == 0) return;
         assertf(are_there(-1), "Missing expression", "Binary operator: '%s' is missing it's left hand side expression, since it is at the very start of a file!", peek(0));
-        next();
+        skip(binary + 1);
         v_expr();
     }
 
@@ -263,6 +268,13 @@ public class TokenValidator extends Stage<String> {
         if(!peek(0).equals("{")) v_stmt();
     }
 
+    private void v_access() throws Exception {
+        if(!peek(0).equals("[")) return;
+        next();
+        v_expr();
+        next();
+    }
+
     private boolean v_block() {
         if(peek(0).equals("do")) {
             next();
@@ -274,7 +286,6 @@ public class TokenValidator extends Stage<String> {
         return true;
     }
 
-    // TODO: 'in_where' is a bad name
     /** @param in_where is meant to be a formatted string finishing the sentence:
     *   <b>"Found bad character: '%c' in the "</b> with, e.g.: "name of a variable: '%s'"  */
     private void validate_identifier(String token, String in_where, String identifier) {
@@ -286,6 +297,27 @@ public class TokenValidator extends Stage<String> {
         }
     }
 
+    // I did not copy her, it’s not true! It’s bullsh*t! I did not copy her! I did not!
+    private int matching_operator_chars(String[] all) {
+        for(String op : all) {
+            boolean matches = true;
+            for(int i = 0; i < op.length(); i ++) {
+                if(op.charAt(i) != peek(i).charAt(0)) {
+                    matches = false;
+                    break;
+                }
+            }
+            if(matches) return op.length();
+        }
+        return 0;
+    }
+
+    private String concat_tokens(int amount) {
+        StringBuilder b = new StringBuilder();
+        for(; amount > 0; amount --)
+            b.append(next());
+        return b.toString();
+    }
     private boolean has_closing_paren(char opening, char closing) {
         int level = 1;
         for(int i = 0; i + curr < tokens.size(); i ++) {

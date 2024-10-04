@@ -1,6 +1,6 @@
-# print("A test")
-$insert "test2.u"
-# print("B test")
-b : num = 55
-a : [] num = [ 25 + b 25 25 25 ]
-print(a[2])
+a : [] num = [ 10 ]
+b : num = 11
+
+if a[0] == b {
+    print("a[0] == b")
+}

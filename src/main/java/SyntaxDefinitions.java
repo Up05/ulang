@@ -33,6 +33,7 @@ public class SyntaxDefinitions {
     static final String TYPE_BOOLEAN = "bool";
     static final String TYPE_STRING  = "string";
     static final String TYPE_CHAR    = "char";
+    static final String TYPE_ANY     = "any";
 
     static Map<String, Class> types = Map.of(
         TYPE_NUMBER,  Double.class,
@@ -60,6 +61,7 @@ public class SyntaxDefinitions {
 
     static HashMap<String, OperatorTypeData> binary_types = new HashMap<>();
     static {
+        //                                    OUTPUT TYPE  INPUT 1      INPUT 2      // Why tf did I order them like that???
         binary_types.put("+", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
         binary_types.put("-", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
         binary_types.put("*", entype_operator(TYPE_NUMBER, TYPE_NUMBER, TYPE_NUMBER));
@@ -73,5 +75,8 @@ public class SyntaxDefinitions {
         binary_types.put("<",  entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
         binary_types.put(">=", entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
         binary_types.put("<=", entype_operator(TYPE_BOOLEAN, TYPE_NUMBER, TYPE_NUMBER));
+
+        binary_types.put("==", entype_operator(TYPE_BOOLEAN, TYPE_ANY, TYPE_ANY));
+        binary_types.put("!=", entype_operator(TYPE_BOOLEAN, TYPE_ANY, TYPE_ANY));
     }
 }

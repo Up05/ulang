@@ -85,10 +85,8 @@ public class TypeValidator {
 
             for(Ast child : node.body) validate(child);
         }
-
-
         default -> System.out.println("TypeValidator skipped an ast");
-        // Ast.Ret is validate inside Ast.FnDecl. Why would anyone put it outside a function?
+        // Ast.Ret is validated inside Ast.FnDecl. Why would anyone put it outside a function?
         }
 
         return "";
@@ -106,9 +104,25 @@ public class TypeValidator {
         String type2 = validate(expr);
         if(type == null || type2 == null) {
             System.out.printf("Skipped type checking in '%s' on line %d. In %s\n", error.file, error.line, in_where);
-        } else {
+        } else if(!type.equals(SyntaxDefinitions.TYPE_ANY)) {
             error.assertf(type.equals(type2), Error.Type.TYPE.name, "Mismatched types: expected '%s', got '%s' in %s", type, type2, in_where);
         }
+    }
+
+    public static int get_precedence(Token t) {
+        String[][] table_ref = null;
+        if(t.type == Lexer.Type.UNARY_OPERATOR) table_ref = SyntaxDefinitions.unary_precedence_table;
+        else if(t.type == Lexer.Type.BINARY_OPERATOR) table_ref = SyntaxDefinitions.binary_precedence_table;
+        else System.out.println("It is only possible to get precedence of unary & binary operators!");
+
+        for(int i = 0; i < table_ref.length; i ++) {
+            for(int j = 0; j < table_ref[i].length; j ++) {
+                if(table_ref[i][j].equals(t.token)) return i;
+                // precedence CAN be 0 here and I don't really see a problem with that.
+            }
+        }
+
+        return 1;
     }
 
 }
