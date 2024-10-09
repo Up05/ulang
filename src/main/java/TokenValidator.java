@@ -44,7 +44,7 @@ public class TokenValidator extends Stage<String> {
         else return false;
     }
 
-    private static final String[] tokens_to_skip = { "}", "]", ")", ";", "," };
+    private static final String[] tokens_to_skip = { "}", "]", ")", ";", ",", "return" };
     private boolean skip_some_tokens() {
         if(Util.array_contains(tokens_to_skip, peek(0))) {
             next();
@@ -211,9 +211,11 @@ public class TokenValidator extends Stage<String> {
         String name = next();
         validate_identifier(name, "function: '%s' call", name);
         next(); // skips '('
+        int tries = 0;
         while(!peek(0).equals(")")) {
             if(peek(0).equals(",")) next();
             v_expr();
+            v_not_hung(tries ++, "arguments of function call");
         }
         next(); // skips ')'
         return true;

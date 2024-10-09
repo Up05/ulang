@@ -42,7 +42,7 @@ public class Debug {
         sender.close();
     }
 
-    private static String zip(Ast ast) {
+    public static String zip(Ast ast) {
         StringBuilder b = new StringBuilder();
 
         b.append('(');
@@ -87,9 +87,7 @@ public class Debug {
             b.append(zip(node.value));
         }
         case Ast.FnDecl node -> {
-            if(node.ret == null) b.append(node.name);
-            // else b.append(node.name).append(" -> ").append(node.ret.getSimpleName());
-            else b.append(node.name).append(" -> ").append(node.ret_typename);
+            b.append(node.name).append(" -> ").append(node.ret_typename);
             for(Ast arg   : node.args) b.append(zip(arg));
             for(Ast child : node.body) b.append(zip(child));
         }

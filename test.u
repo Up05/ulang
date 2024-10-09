@@ -1,6 +1,14 @@
-if true {
-a: [] num = [ 5 ]
-a[0] = 6
-println(a[0])
-
+func cumsum(arr: [] num) [] num {
+    out: [] num = make_array(len(arr))
+    out[0] = arr[0]
+    for i: num = 0; i < len(arr); i = i + 1 {
+        if i > 0 do out[i] = out[i - 1] + arr[i]
+    }
+    return out
 }
+summed: [] num = cumsum([ 1, 2, 3, 4 ])
+
+for i: num = 0; i < len(summed); i = i + 1 {
+    println(summed[i])
+}
+

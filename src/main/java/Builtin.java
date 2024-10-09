@@ -1,6 +1,4 @@
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // What a useful class!
 public class Builtin {
@@ -11,7 +9,8 @@ public class Builtin {
         "register_error", SyntaxDefinitions.TYPE_BOOLEAN,
         "pop", SyntaxDefinitions.TYPE_ANY, // THIS SUCKS MAN...
         "remove", SyntaxDefinitions.TYPE_ANY, // THIS SUCKS MAN...
-        "len", SyntaxDefinitions.TYPE_NUMBER
+        "len", SyntaxDefinitions.TYPE_NUMBER,
+        "make_array", "[] " + SyntaxDefinitions.TYPE_ANY
     );
 
     public void print(List<Object> args) {
@@ -48,6 +47,10 @@ public class Builtin {
     public void append(List<Object> args) {
         List list = (List) args.get(0);
         list.add(args.get(1));
+    }
+
+    public List make_array(List<Object> args) {
+        return new ArrayList(Collections.nCopies(((Number) args.get(0)).intValue(), 0));
     }
 
     public Object pop(List<Object> args) {

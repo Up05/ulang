@@ -68,20 +68,24 @@ public class Parser extends Stage<Token> {
                 if(next() == null) break;
                 continue;
             }
-            Ast node = null;
-            node = new Monad<>(node, null) // This isn't actually "always null"
-                .bind(this::parse_func_decl)
-                .bind(this::parse_decl)
-                .bind(this::parse_for)
-                .bind(this::parse_if)
-                .bind(this::parse_func)
-                .unwrap();
-            if(node != null) root.children.add(node);
-            else {
-                assertf(parse_expr() != null, "Found an expression at global level. Please put it into a function.");
+            root.children.add(parse_expr());
 
-
-            }
+            // I remember that there was a reason for me not doing this... But, to be honest, I don't remember it...
+//            Ast node = null;
+//            node = new Monad<>(node, null) // This isn't actually "always null"
+//                .bind(this::parse_func_decl)
+//                .bind(this::parse_decl)
+//                .bind(this::parse_for)
+//                .bind(this::parse_if)
+//                .bind(this::parse_func)
+//                .unwrap();
+//            if(node != null) root.children.add(node);
+//            else {
+//                System.out.println(Debug.zip(parse_expr()));
+//                // assertf(parse_expr() != null, "Found an expression at global level. Please put it into a function.");
+//
+//
+//            }
 
             curr++; // shouldn't need this eventually...
         }
@@ -106,12 +110,12 @@ public class Parser extends Stage<Token> {
 
         try {
             node = new Monad<>(node, null)
+                .bind(this::parse_func_decl)
                 .bind(this::parse_access)
                 .bind(this::parse_for)
                 .bind(this::parse_if)
                 .bind(this::parse_return)
                 .bind(this::parse_decl)
-//                 .bind(this::parse_assign)
                 .bind(this::parse_func)
                 .bind(this::parse_const)
                 .bind(this::parse_unary_op)

@@ -108,9 +108,16 @@ public class TypeValidator {
         String type2 = validate(expr);
         if(type == null || type2 == null) {
             System.out.printf("Skipped type checking in '%s' on line %d. In %s\n", error.file, error.line, in_where);
-        } else if(!type.equals(SyntaxDefinitions.TYPE_ANY)) {
+        } else if(!interchangible(type, type2)) {
             error.assertf(type.equals(type2), Error.Type.TYPE.name, "Mismatched types: expected '%s', got '%s' in %s", type, type2, in_where);
         }
+    }
+
+    private boolean interchangible(String a, String b) {
+        if(a.equals(SyntaxDefinitions.TYPE_ANY) || b.equals(SyntaxDefinitions.TYPE_ANY)) return true;
+        if(a.startsWith("[] ") || b.startsWith("[] "))
+            if(a.endsWith("any") || b.endsWith("any")) return true;
+        return a.equals(b);
     }
 
     public static int get_precedence(Token t) {

@@ -55,7 +55,7 @@ public class Interpreter {
             for(HashMap<String, Object> scope : scopes) { // I would love this to be reversed :(
                 Object val = scope.get(node.name);
                 if(val != null) {
-                    if(node.assignment != null) val = eval(node.assignment);
+                    if(node.assignment != null) scope.put(node.name, eval(node.assignment));
                     return val;
                 }
             }
