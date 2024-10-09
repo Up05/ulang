@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -36,7 +37,7 @@ public class TypeValidator {
             String[] args = new String[node.args.size() + 1];
             args[0] = node.ret_typename;
             for(int i = 0; i < node.args.size(); i ++ ) {
-                args[i] = node.args.get(i).typename;
+                args[i + 1] = node.args.get(i).typename;
                 validate(node.args.get(i));
             }
             func_ret_and_args.put(node.name, args);
@@ -50,9 +51,11 @@ public class TypeValidator {
         }
         case Ast.Func node -> {
             String[] args = func_ret_and_args.get(node.name);
-            if(args == null) return null; // TODO: band-aid fix, fuck it and just implement a proper builtin thing...
-            for(int i = 1; i < args.length; i ++)
-               assertf_type(node.error, args[i], node.args[i], (i + 1) + "th parameter of function " + node.name); // firth, secoth, thith, fourth
+            if(args == null)
+                return Builtin.RETURN_TYPES.get(node.name);
+            if(args.length > 1)
+                for(int i = 1; i < args.length; i ++)
+                   assertf_type(node.error, args[i], node.args[i - 1], (i + 1) + "th parameter of function " + node.name); // firth, secoth, thith, fourth
             return args[0];
         }
         case Ast.UnaOp node -> {
@@ -62,17 +65,19 @@ public class TypeValidator {
         }
         case Ast.BinOp node -> {
             SyntaxDefinitions.OperatorTypeData types = SyntaxDefinitions.binary_types.get(node.name);
-            assertf_type(node.error, types.lhs, node.lhs,  "left of binary operator: '" + node.name + "'");
+            assertf_type(node.error, types.lhs, node.lhs, " left of binary operator: '" + node.name + "'"); // oopsie poopsie
             assertf_type(node.error, types.rhs, node.rhs, "right of binary operator: '" + node.name + "'");
             return types.out;
         }
         case Ast.Array node -> {
-            for(Ast value : node.values) assertf_type(value.error, node.typename.substring(3), value, "array literal");
+            for(Ast value : node.values) {
+                assertf_type(value.error, node.typename.substring(3), value, "array element");
+            }
             return node.typename;
         }
         case Ast.Key node -> {
             assertf_type(node.error, SyntaxDefinitions.TYPE_NUMBER, node.index, "array index");
-            return validate(node.array);
+            return validate(node.array).substring(3);
         }
         case Ast.If node -> {
             assertf_type(node.error, SyntaxDefinitions.TYPE_BOOLEAN, node.cond, "'if' statement's condition");
@@ -80,12 +85,14 @@ public class TypeValidator {
 
         }
         case Ast.For node -> {
+            validate(node.pre);
+            validate(node.post);
             if(node.pre != null || node.cond != null || node.post != null)
                 assertf_type(node.error, SyntaxDefinitions.TYPE_BOOLEAN, node.cond, "'for' statement's middle statement");
 
             for(Ast child : node.body) validate(child);
         }
-        default -> System.out.println("TypeValidator skipped an ast");
+        default -> System.out.println("TypeValidator skipped an ast node...");
         // Ast.Ret is validated inside Ast.FnDecl. Why would anyone put it outside a function?
         }
 

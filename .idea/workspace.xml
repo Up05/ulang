@@ -9,12 +9,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Finished, but didn't yet properly test, Type validation.&#10;Oops! I never versioned the files...">
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Fixed TokenValidator throwing a comp-time error for valid syntax. Although, I the fix is quite dubious.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Builtin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Builtin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Interpreter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interpreter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Lexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Parser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TokenValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TokenValidator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TypeValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TypeValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Builtin.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Builtin.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Lexer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Parser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Parser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/ParserException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/ParserException.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/TokenValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TokenValidator.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/TypeValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TypeValidator.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.u" beforeDir="false" afterPath="$PROJECT_DIR$/test.u" afterDir="false" />
@@ -187,7 +194,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727788856176</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Fixed TokenValidator throwing a comp-time error for valid syntax. Although, I the fix is quite dubious.">
+      <option name="closed" value="true" />
+      <created>1728019217630</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1728019217630</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -227,18 +242,10 @@
     <MESSAGE value="I guess, I did some other things..." />
     <MESSAGE value="Finished, but didn't yet properly test, Type validation." />
     <MESSAGE value="Finished, but didn't yet properly test, Type validation.&#10;Oops! I never versioned the files..." />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished, but didn't yet properly test, Type validation.&#10;Oops! I never versioned the files..." />
+    <MESSAGE value="Fixed TokenValidator throwing a comp-time error for valid syntax. Although, I the fix is quite dubious." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed TokenValidator throwing a comp-time error for valid syntax. Although, I the fix is quite dubious." />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/TypeValidator.java</url>
-          <line>103</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="JarApplication">
         <watch expression="peek(0)" language="JAVA" />

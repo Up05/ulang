@@ -7,6 +7,13 @@ public class Builtin {
 
     public Map<Integer, String> error_names = new HashMap<>();
 
+    public static final Map<String, String> RETURN_TYPES = Map.of(
+        "register_error", SyntaxDefinitions.TYPE_BOOLEAN,
+        "pop", SyntaxDefinitions.TYPE_ANY, // THIS SUCKS MAN...
+        "remove", SyntaxDefinitions.TYPE_ANY, // THIS SUCKS MAN...
+        "len", SyntaxDefinitions.TYPE_NUMBER
+    );
+
     public void print(List<Object> args) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < args.size(); i++) {
@@ -24,7 +31,6 @@ public class Builtin {
         }
         System.out.println(b);
     }
-    // printf
 
     public void handle(List<Object> args) {
         int value = ((Number) args.get(0)).intValue();

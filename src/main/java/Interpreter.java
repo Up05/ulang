@@ -184,7 +184,10 @@ public class Interpreter {
     private Object index_into(Ast.Key node) {
         Object container = eval(node.array);
         if(container instanceof List list) {
-            return list.get(((Number) eval(node.index)).intValue());
+            int i = ((Number) eval(node.index)).intValue();
+            node.error.assertf(i > -1 && i < list.size(), "Index out of bounds",
+                "Index '%d' is out of bounds for length '%d' in '%s'!", i, list.size(), node.array.name);
+            return list.get(i);
         } else if(container instanceof Map map) {
             temp_assertf(false, "NYI");
         }
@@ -222,5 +225,4 @@ public class Interpreter {
 
         System.out.println(msg);
     }
-
 }

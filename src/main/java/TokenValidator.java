@@ -88,9 +88,17 @@ public class TokenValidator extends Stage<String> {
         validate_identifier(next(), "name of function: '%s'!", name);
         assertf(next().equals("("),             "Missing parenthesis",  "Missing '(' in function: '%s' declaration!", name);
         assertf(has_closing_paren('(', ')'),    "Missing parenthesis",  "missing ')' in function: '%s' declaration!", name);
+        int tries = 0;
         while(!peek(0).equals(")")) {
             v_decl();
+
+            // super out of the blue, but I encountered it, so chances are, others will too...
+            // either way, this class is meant as more of a "scripted" thing to catch all the human errors
+            // (as well as to not need to reconfirm assumptions elsewhere)
+            assertf(!peek(0).equals("]"), "Brackets on wrong side of type", "The '%s []' should be '[] %s' in function: '%s' declaration", peek(-2), peek(-2), name);
+            v_not_hung(tries, "the parameters of function " + name + " declaration");
             if(peek(0).equals(",")) next();
+            tries ++;
         }
         next();
         if(!peek(0).equals("{")) v_type();
@@ -110,7 +118,7 @@ public class TokenValidator extends Stage<String> {
             declared_vars.add(name);
             next();
             v_type();
-            next();
+            // next(); // Why was this here???
         }
 
         if(peek(0).equals("=")) {
@@ -185,7 +193,6 @@ public class TokenValidator extends Stage<String> {
                 next();
             }
             assertf(next().equals("]"), "Missing ']'", "Array type syntax needs both '[' and ']'. Missing: ']'!");
-            return true;
         }
         validate_identifier(peek(0), "type: '%s'", next());
         return true;
@@ -224,7 +231,7 @@ public class TokenValidator extends Stage<String> {
         int binary = matching_operator_chars(SyntaxDefinitions.binary_operators);
         if(binary == 0) return;
         assertf(are_there(-1), "Missing expression", "Binary operator: '%s' is missing it's left hand side expression, since it is at the very start of a file!", peek(0));
-        skip(binary + 1);
+        skip(binary);
         v_expr();
     }
 
@@ -249,7 +256,8 @@ public class TokenValidator extends Stage<String> {
 
         if(!peek(0).equals(";")) {
             v_stmt();
-            if(!peek(0).equals("{")) v_for_validate_the_rest();
+            if(!peek(0).equals("{"))
+                v_for_validate_the_rest();
         } else v_for_validate_the_rest();
 
         v_block();
@@ -265,7 +273,9 @@ public class TokenValidator extends Stage<String> {
         if(!peek(0).equals(";")) v_expr();
 
         assertf(next().equals(";"), "Missing semicolon", "for loop must have either 0 or 2, but it has 1!");
-        if(!peek(0).equals("{")) v_stmt();
+
+        if(!peek(0).equals("{"))
+            v_stmt();
     }
 
     private void v_access() throws Exception {
@@ -312,12 +322,6 @@ public class TokenValidator extends Stage<String> {
         return 0;
     }
 
-    private String concat_tokens(int amount) {
-        StringBuilder b = new StringBuilder();
-        for(; amount > 0; amount --)
-            b.append(next());
-        return b.toString();
-    }
     private boolean has_closing_paren(char opening, char closing) {
         int level = 1;
         for(int i = 0; i + curr < tokens.size(); i ++) {
@@ -329,6 +333,23 @@ public class TokenValidator extends Stage<String> {
         return level <= 0;
     }
     // I should validate parens with Stack<Character> or whatever like that, e.g.: [ '(', '{' ] + '}' -> [ '(' ]; [ '(', '{' ] + ')' -> error: mismatched parens
+
+    private String tokens_around_curr(int count) {
+        StringBuilder b = new StringBuilder();
+        for(int i = count; i > 0; i --) b.append(peek(-i));
+        for(int i = 0; i < count; i ++) b.append(peek(i));
+        return b.toString();
+    }
+
+    private void v_not_hung(int tries, String in_where) {
+        assertf(tries < 32767, "Token validator hung...", // just a nice number.
+            """
+            There is, likely, an unexpected symbol in %s!
+            Example: 'func func_name(arg1 : type1, array : [] type2) { ...'.
+            The program is stuck on token: '%s', around '%s' code.
+            """, in_where, peek(0), tokens_around_curr(2)
+        );
+    }
 
     // I dislike this kind of aliasing, but this is such a common function and there's 'error_stack.peek().' of noise before every call to it...
     private void assertf(boolean expr, String title, String format, Object... args) {

@@ -1,6 +1,9 @@
-a : [] num = [ 10 ]
-b : num = 11
-
-if a[0] == b {
-    print("a[0] == b")
+func cumsum(arr: [] num) [] num {
+    for i: num = 0; i < len(arr); i = i + 1 {
+        v: num = arr[i]
+        if i > 0 do v = v + arr[i - 1]
+        println(v)
+    }
 }
+
+cumsum([ 1, 2, 3, 4 ])

@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 class ParserException extends Exception {
     String message, file;
@@ -122,41 +119,54 @@ public class Parser extends Stage<Token> {
         return node;
     }
 
+    private Map<String, String> types = new HashMap<>();
+
+    private class TypeInfo {
+        Class  type;
+        String typename;
+    }
+    private TypeInfo parse_type() throws ParserException {
+        TypeInfo res = new TypeInfo();
+        if(peek(0).token.equals("array")) {
+            next(); // Technically, arrays are heterogeneous. I'll deal with that at validation & runtime
+            res.type = List.class;
+            res.typename = "[] " + next().token;
+        } else if (peek(0).token.equals("map")) {
+            // ! NYI
+            next(); next(); next();
+            res.type = Map.class;
+        } else {
+            res.type = SyntaxDefinitions.types.get(peek(0).token);
+            res.typename = next().token;
+        }
+        assertf(res.type != null, "Invalid type: '%s' found!", peek(0).token);
+        return res;
+    }
+
     private Ast.Decl parse_decl() throws ParserException {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
         if(curr + 1 >= tokens.size()) return null;
         if(peek(1).type != Lexer.Type.TYPE) return null;
         Ast.Decl node = make(Ast.Decl.class, error_stack.peek());
 
-
         node.name = next().token;
 
+        TypeInfo type_info = parse_type();
+        node.type = type_info.type;
+        node.typename = type_info.typename;
 
-        if(peek(0).token.equals("array")) {
-            next(); // Technically, arrays are heterogeneous. I'll deal with that at validation & runtime
-            node.type = List.class;
-            node.typename = "[] " + next().token;
-        } else if (peek(0).token.equals("map")) {
-            // ! NYI
-            next(); next(); next();
-            node.type = Map.class;
-        } else {
-            node.type = SyntaxDefinitions.types.get(peek(0).token);
-            node.typename = next().token;
-        }
-        assertf(node.type != null, "Invalid type: '%s' found!", peek(0).token);
+        types.put(node.name, node.typename);
 
         if(!peek(0).is("=")) return node;
         next(); // skips '='
 
         if(peek(1).type == Lexer.Type.TYPE) return node; // Oh! So this is why we have commas...
 
-
         Ast expr = parse_binary_op(-1);
         assertf(expr != null, "Failed to parse expression '%s' in variable assignment!", peek(0).token);
 
-        if(node.typename.startsWith("[]"))
-            ((Ast.Array) expr).typename = node.typename;
+        if(expr instanceof Ast.Array array)
+            array.typename = node.typename;
 
         node.value = expr;
 
@@ -172,6 +182,8 @@ public class Parser extends Stage<Token> {
         node.name = next().token;
         next();
         node.value = parse_binary_op(-1);
+        if(node.value instanceof Ast.Array array)
+            array.typename = types.get(node.name);
 
         return node;
 
@@ -250,22 +262,6 @@ public class Parser extends Stage<Token> {
         return node;
     }
 
-    private Ast.Func parse_func() throws ParserException {
-        if(peek(0).type != Lexer.Type.FUNCTION_CALL) return null;
-        Ast.Func node = make(Ast.Func.class, error_stack.peek());
-        node.name = next().token;
-        ArrayList<Ast> args = new ArrayList<>();
-        next(); // skips '('
-        while(!peek(0).is(")") || paren_level > 0) {
-            if(peek(0).is(",")) next();
-            args.add(parse_binary_op(-1));
-        }
-        next(); // skips ')'
-        node.args = new Ast[args.size()];
-        args.toArray(node.args);
-        return node;
-    }
-
     private Ast.FnDecl parse_func_decl() throws ParserException {
         if(peek(0).type != Lexer.Type.FUNCTION_DECL) return null;
         Ast.FnDecl node = make(Ast.FnDecl.class, error_stack.peek());
@@ -282,19 +278,37 @@ public class Parser extends Stage<Token> {
         next(); // skips ')'
 
         if(peek(0).type == Lexer.Type.TYPE) {
-            node.ret = SyntaxDefinitions.types.get(peek(0).token);
-            node.ret_typename = next().token;
+            TypeInfo type_info = parse_type();
+            node.ret = type_info.type;
+            node.ret_typename = type_info.typename;
+            types.put(node.name, node.ret_typename);
         }
-
         node.body = parse_block();
         return node;
     }
 
-    private Ast.For parse_for() throws ParserException {
+    private Ast.Func parse_func() throws ParserException {
+        if(peek(0).type != Lexer.Type.FUNCTION_CALL) return null;
+        Ast.Func node = make(Ast.Func.class, error_stack.peek());
+        node.name = next().token;
+        ArrayList<Ast> args = new ArrayList<>();
+        next(); // skips '('
+        while(!peek(0).is(")") || paren_level > 0) {
+            if(peek(0).is(",")) next();
+            args.add(parse_binary_op(-1));
+        }
+        next(); // skips ')'
+        node.args = new Ast[args.size()];
+        args.toArray(node.args);
+        return node;
+    }
+
+    private Ast.For parse_for() throws Exception {
         if(!peek(0).is("for")) return null;
         next();
         Ast.For node = make(Ast.For.class, error_stack.peek());
         node.body = new ArrayList<>();
+
         if(!peek(0).is("{") && !peek(0).is("do")) node.pre = parse_expr();
         if(peek(0).is(";")) {
             next();
@@ -370,10 +384,26 @@ public class Parser extends Stage<Token> {
         next(); /// skips '['
         while(!peek(0).is("]")) {
             if(peek(0).is(",")) next();
-            array.values.add(parse_binary_op(-1));
+            Ast node = parse_binary_op(-1);
+            array.values.add(node);
+            String elem_type = fetch_type_of(node);
+            if(elem_type != null) array.typename = "[] " + elem_type;
         }
         next(); // skips ']'
         return array;
+    }
+
+    private String fetch_type_of(Ast ast) {
+        switch(ast) {
+        case Ast.Var  node -> { return types.get(node.name); }
+        case Ast.Func node -> { return types.get(node.name); }
+        case Ast.Array node -> { return node.typename; }
+        case Ast.Const node -> { return node.typename; }
+        case Ast.UnaOp node -> { return SyntaxDefinitions.unary_types.get(node.name).out; }
+        case Ast.BinOp node -> { return SyntaxDefinitions.binary_types.get(node.name).out; }
+        case Ast.Key ignored -> { return SyntaxDefinitions.TYPE_NUMBER; }
+        default -> { return null; }
+        }
     }
 
     // TODO: Remove. But first, finish* TypeValidator
