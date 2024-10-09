@@ -74,6 +74,8 @@ public class Debug {
             b.append("[");
             b.append(zip(node.array));
             b.append(zip(node.index));
+            if(node.assignment != null)
+                b.append("(=").append(zip(node.assignment)).append(')');
         }
         case Ast.Array node -> {
             b.append("array");
@@ -90,10 +92,6 @@ public class Debug {
             else b.append(node.name).append(" -> ").append(node.ret_typename);
             for(Ast arg   : node.args) b.append(zip(arg));
             for(Ast child : node.body) b.append(zip(child));
-        }
-        case Ast.Assign node -> {
-            b.append(node.name).append(" = ");
-            b.append(zip(node.value));
         }
         case Ast.For node -> {
             b.append("for")
@@ -112,7 +110,10 @@ public class Debug {
 
         // case Ast.Const node -> b.append(node.value).append(": ").append(node.value.getClass().getSimpleName());
         case Ast.Const node -> b.append(node.value).append(": ").append(node.typename);
-        case Ast.Var node -> b.append('$').append(node.name);
+        case Ast.Var node -> {
+            b.append('$').append(node.name);
+            if(node.assignment != null) b.append(" = ").append(zip(node.assignment));
+        }
         default -> throw new IllegalStateException("Unexpected value: " + ast);
         }
 

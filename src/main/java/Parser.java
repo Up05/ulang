@@ -43,6 +43,7 @@ public class Parser extends Stage<Token> {
             if(peek(0).type == Lexer.Type.INSERTED_FILE) {
                 error_stack.push(new Error(Error.Type.TYPE, peek(0).token));
             } else if(peek(0).is("EOF")) {
+                if(error_stack.empty()) return null;
                 error_stack.pop();
             } else if(peek(0).is("\n")) {
                 error_stack.peek().line ++;
@@ -76,6 +77,11 @@ public class Parser extends Stage<Token> {
                 .bind(this::parse_func)
                 .unwrap();
             if(node != null) root.children.add(node);
+            else {
+                assertf(parse_expr() != null, "Found an expression at global level. Please put it into a function.");
+
+
+            }
 
             curr++; // shouldn't need this eventually...
         }
@@ -147,14 +153,13 @@ public class Parser extends Stage<Token> {
     
         if(!peek(0).is("=")) return null;
         next(); // skips '='
-
-        if(peek(1).type == Lexer.Type.TYPE) return node; // Oh! So this is why we have commas...
+        // if(peek(1).type == Lexer.Type.TYPE) return node; // Oh! So this is why we have commas...
 
         Ast expr = parse_binary_op(-1);
         assertf(expr != null, "Failed to parse expression '%s' in variable assignment!", peek(0).token);
 
         if(expr instanceof Ast.Array array)
-            array.typename = node.typename;
+            array.typename = parent_typename;
 
         return expr;
     }
@@ -178,11 +183,11 @@ public class Parser extends Stage<Token> {
     }
 
     private Ast.Var parse_var() throws ParserException {
-        if(!could_be_ident(peek(0))) return null;
+        if(!could_be_ident(peek(0).token)) return null;
         // TODO: I guess, check if declared & (maybe not a keyword)
         Ast.Var var = make(Ast.Var.class, error_stack.peek());
         var.name = next().token;
-        var.assignment = parse_assign(fetch_var_type(var.name))
+        var.assignment = parse_assign(fetch_type_of(var));
         return var;
     }
 
@@ -357,13 +362,19 @@ public class Parser extends Stage<Token> {
     }
 
     // This should be a binary operator, but I currently do not have logic for consuming ']'
-    private Ast.Key parse_access() throws ParserException {
+    private Ast.Key parse_access() throws Exception {
         if(peek(1).type != Lexer.Type.CONTAINER_INDEX) return null;
         Ast.Key node = make(Ast.Key.class, error_stack.peek());
-        node.array = parse_var();
+        node.array = new Monad<Ast>(null, null)
+            .bind(this::parse_var)
+            .bind(this::parse_array)
+            .bind(this::parse_access)
+            .bind(this::parse_func)
+            .unwrap();
         next(); // skips '['
         node.index = parse_binary_op(-1);
         next(); // skips ']'
+        node.assignment = parse_assign(fetch_type_of(node.array).substring(3));
         return node;
     }
 
@@ -399,7 +410,7 @@ public class Parser extends Stage<Token> {
     private Boolean could_be_ident(String token) {
         if(token.charAt(0) < 'A') return false;
         for(char c : token.toCharArray()) {
-            if(!of(c, '0', '9', 'A', 'Z', 'a', 'z')) {
+            if(!Util.any_of(c, '0', '9', 'A', 'Z', 'a', 'z')) {
                 return false;
             }
         }    

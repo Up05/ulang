@@ -29,9 +29,6 @@ public class TypeValidator {
         case Ast.Const node -> {
             return node.typename;
         }
-        case Ast.Assign node -> {
-            assertf_type(node.error, fetch_var_type(node.name), node.value, "assignment of " + node.name);
-        }
         case Ast.FnDecl node -> {
             scopes.push(new HashMap<>());
             String[] args = new String[node.args.size() + 1];

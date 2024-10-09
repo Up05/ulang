@@ -19,7 +19,6 @@ public class Interpreter {
             for(Ast child : node.children) interpret(child);
         }
         case Ast.Decl node -> declare_var(node);
-        case Ast.Assign node -> assign(node);
         // Don't need to do anything here... Functions & Types truly should have their own ASTs...
         case Ast.FnDecl ignored -> { }
         case Ast.Func node -> call(node);
@@ -32,7 +31,8 @@ public class Interpreter {
         case Ast.For node -> interpret_for(node);
         case Ast.If node -> interpret_if(node);
 
-        case Ast.Var node -> eval(node); // Why is this here???
+        case Ast.Var node -> eval(node);
+        case Ast.Key node -> index_into(node);
         // delete this eventually
         default -> throw new IllegalStateException("Unexpected value: " + ast);
         }
@@ -45,14 +45,6 @@ public class Interpreter {
         scopes.peek().put(node.name, val);
     }
 
-    private void assign(Ast.Assign node) {
-        for(HashMap<String, Object> scope : scopes) {
-            if(scope.containsKey(node.name)) {
-                scope.put(node.name, eval(node.value));
-            }
-        }
-    }
-
     private Object eval(Ast ast) {
         if(ast == null) return null;
         switch(ast) {
@@ -62,7 +54,10 @@ public class Interpreter {
         case Ast.Var node -> {
             for(HashMap<String, Object> scope : scopes) { // I would love this to be reversed :(
                 Object val = scope.get(node.name);
-                if(val != null) return val;
+                if(val != null) {
+                    if(node.assignment != null) val = eval(node.assignment);
+                    return val;
+                }
             }
             temp_assertf(false, "Trying to get the value of an undeclared variable"); // This should not get past the Validator
         }
@@ -81,7 +76,6 @@ public class Interpreter {
         case Ast.Key node -> {
             return index_into(node);
         }
-
         default -> throw new IllegalStateException("Unexpected value: " + ast);
         }
         return null;
@@ -190,7 +184,8 @@ public class Interpreter {
         if(container instanceof List list) {
             int i = ((Number) eval(node.index)).intValue();
             node.error.assertf(i > -1 && i < list.size(), "Index out of bounds",
-                "Index '%d' is out of bounds for length '%d' in '%s'!", i, list.size(), node.array.name);
+                "Index '%d' is out of bounds for length '%d'!", i, list.size()); // Could do "Debug.get_token_name"
+            if(node.assignment != null) list.set(i, node.assignment);
             return list.get(i);
         } else if(container instanceof Map map) {
             temp_assertf(false, "NYI");

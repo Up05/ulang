@@ -283,6 +283,7 @@ public class TokenValidator extends Stage<String> {
         next();
         v_expr();
         next();
+        if(peek(0).equals("=")) next();
     }
 
     private boolean v_block() {

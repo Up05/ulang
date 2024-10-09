@@ -15,13 +15,12 @@ public class Ast {
 
     static class Array extends Ast { List<Ast> values; String typename; }
     static class Table extends Ast { Map<Ast, Ast> map; }
-    static class Key   extends Ast { Ast.Var array; Ast index; Ast assignment; } // This is for both: Array and Table
+    static class Key   extends Ast { Ast array; Ast index; Ast assignment; } // This is for both: Array and Table
     // static class JavaFunc extends Ast { String path; } // Because I might compile to C. I will NEED built-ins either way
 
     static class Decl   extends Ast { String name; Class type; String typename; Ast value; }
     static class FnDecl extends Ast { String name; Class ret; String ret_typename; List<Ast.Decl> args; List<Ast> body; }
 
-    // static class Assign extends Ast { String name; Ast value; }
     static class Var    extends Ast { String name; Ast assignment; }
     static class Const  extends Ast { Object value; String typename; }
 
