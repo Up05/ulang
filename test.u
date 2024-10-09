@@ -1,4 +1,6 @@
 if true {
 a: [] num = [ 5 ]
 a[0] = 6
+println(a[0])
+
 }

@@ -185,7 +185,7 @@ public class Interpreter {
             int i = ((Number) eval(node.index)).intValue();
             node.error.assertf(i > -1 && i < list.size(), "Index out of bounds",
                 "Index '%d' is out of bounds for length '%d'!", i, list.size()); // Could do "Debug.get_token_name"
-            if(node.assignment != null) list.set(i, node.assignment);
+            if(node.assignment != null) list.set(i, eval(node.assignment));
             return list.get(i);
         } else if(container instanceof Map map) {
             temp_assertf(false, "NYI");
