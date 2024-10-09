@@ -1,3 +1,4 @@
 TokenValidator.class
 Error$Type.class
 Error.class
+Parser$TypeInfo.class

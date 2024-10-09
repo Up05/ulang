@@ -105,7 +105,7 @@ public class Parser extends Stage<Token> {
                 .bind(this::parse_if)
                 .bind(this::parse_return)
                 .bind(this::parse_decl)
-                .bind(this::parse_assign)
+//                 .bind(this::parse_assign)
                 .bind(this::parse_func)
                 .bind(this::parse_const)
                 .bind(this::parse_unary_op)
@@ -143,6 +143,22 @@ public class Parser extends Stage<Token> {
         return res;
     }
 
+    private Ast parse_assign(String parent_typename) throws ParserException {
+    
+        if(!peek(0).is("=")) return null;
+        next(); // skips '='
+
+        if(peek(1).type == Lexer.Type.TYPE) return node; // Oh! So this is why we have commas...
+
+        Ast expr = parse_binary_op(-1);
+        assertf(expr != null, "Failed to parse expression '%s' in variable assignment!", peek(0).token);
+
+        if(expr instanceof Ast.Array array)
+            array.typename = node.typename;
+
+        return expr;
+    }
+
     private Ast.Decl parse_decl() throws ParserException {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
         if(curr + 1 >= tokens.size()) return null;
@@ -156,43 +172,17 @@ public class Parser extends Stage<Token> {
         node.typename = type_info.typename;
 
         types.put(node.name, node.typename);
-
-        if(!peek(0).is("=")) return node;
-        next(); // skips '='
-
-        if(peek(1).type == Lexer.Type.TYPE) return node; // Oh! So this is why we have commas...
-
-        Ast expr = parse_binary_op(-1);
-        assertf(expr != null, "Failed to parse expression '%s' in variable assignment!", peek(0).token);
-
-        if(expr instanceof Ast.Array array)
-            array.typename = node.typename;
-
-        node.value = expr;
+        node.value = parse_assign(node.typename);
 
         return node;
-    }
-
-    private Ast.Assign parse_assign() throws ParserException {
-        if(peek(0).type != Lexer.Type.VARIABLE) return null;
-        if(curr + 1 >= tokens.size()) return null;
-        if(!peek(1).is("=")) return null;
-        Ast.Assign node = make(Ast.Assign.class, error_stack.peek());
-
-        node.name = next().token;
-        next();
-        node.value = parse_binary_op(-1);
-        if(node.value instanceof Ast.Array array)
-            array.typename = types.get(node.name);
-
-        return node;
-
     }
 
     private Ast.Var parse_var() throws ParserException {
+        if(!could_be_ident(peek(0))) return null;
         // TODO: I guess, check if declared & (maybe not a keyword)
         Ast.Var var = make(Ast.Var.class, error_stack.peek());
         var.name = next().token;
+        var.assignment = parse_assign(fetch_var_type(var.name))
         return var;
     }
 
@@ -404,6 +394,16 @@ public class Parser extends Stage<Token> {
         case Ast.Key ignored -> { return SyntaxDefinitions.TYPE_NUMBER; }
         default -> { return null; }
         }
+    }
+
+    private Boolean could_be_ident(String token) {
+        if(token.charAt(0) < 'A') return false;
+        for(char c : token.toCharArray()) {
+            if(!of(c, '0', '9', 'A', 'Z', 'a', 'z')) {
+                return false;
+            }
+        }    
+        return true;
     }
 
     // TODO: Remove. But first, finish* TypeValidator

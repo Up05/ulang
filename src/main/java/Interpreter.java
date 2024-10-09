@@ -6,7 +6,7 @@ public class Interpreter {
     Ast.Root root;
     Builtin builtin = new Builtin();
 
-    public Interpreter(Ast.Root root){
+    public Interpreter(Ast.Root root) {
         scopes = new Stack<>();
         scopes.push(new HashMap<>());
         this.root = root;
@@ -46,7 +46,11 @@ public class Interpreter {
     }
 
     private void assign(Ast.Assign node) {
-        scopes.peek().put(node.name, eval(node.value)); // type-checking? what's that?
+        for(HashMap<String, Object> scope : scopes) {
+            if(scope.containsKey(node.name)) {
+                scope.put(node.name, eval(node.value));
+            }
+        }
     }
 
     private Object eval(Ast ast) {

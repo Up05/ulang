@@ -1,7 +1,6 @@
 /home/ulti/src/ulang/src/main/java/Ast.java
 /home/ulti/src/ulang/src/main/java/Builtin.java
 /home/ulti/src/ulang/src/main/java/Debug.java
-/home/ulti/src/ulang/src/main/java/Declarations.java
 /home/ulti/src/ulang/src/main/java/Error.java
 /home/ulti/src/ulang/src/main/java/Interpreter.java
 /home/ulti/src/ulang/src/main/java/Lexer.java
@@ -9,8 +8,11 @@
 /home/ulti/src/ulang/src/main/java/Monad.java
 /home/ulti/src/ulang/src/main/java/Parser.java
 /home/ulti/src/ulang/src/main/java/Preprocessor.java
+/home/ulti/src/ulang/src/main/java/Stage.java
+/home/ulti/src/ulang/src/main/java/SyntaxDefinitions.java
 /home/ulti/src/ulang/src/main/java/Token.java
 /home/ulti/src/ulang/src/main/java/TokenValidator.java
 /home/ulti/src/ulang/src/main/java/Tokenizer.java
+/home/ulti/src/ulang/src/main/java/TypeValidator.java
 /home/ulti/src/ulang/src/main/java/Util.java
 /home/ulti/src/ulang/src/main/java/Validator.java

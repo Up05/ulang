@@ -92,7 +92,7 @@ public class Debug {
             for(Ast child : node.body) b.append(zip(child));
         }
         case Ast.Assign node -> {
-            b.append(node.name);
+            b.append(node.name).append(" = ");
             b.append(zip(node.value));
         }
         case Ast.For node -> {

@@ -14,6 +14,13 @@ public class Util {
         return list.get(index);
     }
 
-
+    public static boolean of(char c, char... ranges) {
+        for(int i = 0; i < ranges.size(); i += 2) {
+            if(c < ranges[i] || c > ranges[i + 1])
+                return false;    
+            
+        }
+        return true;
+    }
 }
 

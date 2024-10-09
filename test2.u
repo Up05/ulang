@@ -1,5 +1,16 @@
-print("A test2")
-$insert "std.u"
-print("B test2")
 
+
+# func cumsum(arr: [] num) [] num {
+#     for i: num = 0; i < len(arr); i = i + 1 {
+#         v: num = arr[i]
+#         if i > 0 { 
+#             print(v + arr[i - 1])
+#             print(" ")
+#             v = v + arr[i - 1] 
+#         }
+#         println(v)
+#     }
+# }
+# 
+# cumsum([ 1, 2, 3, 4 ])
 
