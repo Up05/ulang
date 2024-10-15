@@ -89,9 +89,12 @@ func println(args: ..any)
 
  # More in "Errors" section
 func handle(error: num)
-func register_error(value: num  string: name) -> bool
+func register_error(value: num  string: name) bool
 
-func make_array(initial_length: num) -> [] any  # items 0..=initial_length are filled with `null`
+func char_at(str: string, index: num) char
+func substring(str: string, from: num, to: num) string
+
+func make_array(initial_length: num) [] any  # items 0..=initial_length are filled with `null`
 func append(list: [] any, value: any)
 func pop(list: [] any) any
 func remove(list: [] any, index: num) any # decimals get truncated to int
