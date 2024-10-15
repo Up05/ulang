@@ -32,6 +32,7 @@ so you cannot omit the type, i.e.: this is invalid: `a := 5`
 num      a 64 bit floating point number, that, here, represents any number
 string   Java's String type
 bool     just a boolean.
+char     utf8 symbol (currently, just Java's char (probably, 2 bytes))
 
 [] <type>         Java's dynamic List<> wrapper.  
 [] [] [] <type>   nesting arrays is supported.
