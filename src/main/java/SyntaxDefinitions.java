@@ -6,7 +6,7 @@ public class SyntaxDefinitions {
     static final Lexer.Type[] tokens_potentially_before_binary_operator = { Lexer.Type.CONSTANT, Lexer.Type.VARIABLE, Lexer.Type.FUNCTION_CALL, Lexer.Type.SYMBOL };
 
     // HashSets may be faster here, but they might just as well be dramatically slower
-    static final String[] reserved = { "int", "i64", "f64", "i32", "f32" };
+    static final String[] reserved = { "int", "i64", "f64", "i32", "f32", "i16", "i8", "u64", "u32", "u16", "u8" };
 
     static final String[]  unary_operators = { "+", "-", "!" };
     static final String[] binary_operators = { ".", "@", "+", "-", "*", "/", "%", "||", "&&", "!=", "==", "<=", ">=", "<", ">", }; // Yes it's duplicate, but flattened -- faster*

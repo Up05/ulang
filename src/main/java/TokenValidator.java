@@ -194,7 +194,8 @@ public class TokenValidator extends Stage<String> {
             }
             assertf(next().equals("]"), "Missing ']'", "Array type syntax needs both '[' and ']'. Missing: ']'!");
         }
-        validate_identifier(peek(0), "type: '%s'", next());
+        if(peek(0).equals("[")) v_type();
+        else validate_identifier(peek(0), "type: '%s'", next());
         return true;
     }
 
@@ -256,14 +257,17 @@ public class TokenValidator extends Stage<String> {
         if(!peek(0).equals("for")) return false;
         next();
 
-        if(!peek(0).equals(";")) {
-            v_stmt();
-            if(!peek(0).equals("{"))
+        if(!peek(0).equals("{")) {
+            if(peek(0).equals(";")) {
                 v_for_validate_the_rest();
-        } else v_for_validate_the_rest();
+            } else {
+                v_stmt();
+                if(!peek(0).equals("{"))
+                    v_for_validate_the_rest();
+            }
+        }
 
         v_block();
-
         return true;
     }
 

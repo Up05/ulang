@@ -165,7 +165,12 @@ public class Lexer extends Stage<String> {
             next();
             if(peek(0).equals("]")) { // declarations, e.g.: a : [] num
                 next();
-                if(!SyntaxDefinitions.types.containsKey(peek(0))) { skip(-2); return false; }
+                if(peek(0).equals("[")) {
+                    lexed_tokens.add(new Token("array", Type.TYPE));
+                    lex_type();
+                    return true;
+                }
+                if(!SyntaxDefinitions.types.containsKey(peek(0))) { skip(-2); return false; } // Is this my way of dealing with a map ???
                 lexed_tokens.add(new Token("array", Type.TYPE));
                 lexed_tokens.add(new Token(next(), Type.TYPE));
             } else if(peek(0).equals("map")) { // maps, e.g.: a : [map] string num

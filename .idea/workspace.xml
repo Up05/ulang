@@ -9,24 +9,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Changed how assignment works.">
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Added builtin function 'make_array(len: num)' &amp; fixed more bugs">
+      <change afterPath="$PROJECT_DIR$/cumsum.u" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Builtin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Builtin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Debug.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Debug.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Interpreter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interpreter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Lexer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Preprocessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Preprocessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TokenValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TokenValidator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TypeValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TypeValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/std.u" beforeDir="false" afterPath="$PROJECT_DIR$/std.u" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/Builtin.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Builtin.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Debug.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Debug.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Interpreter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Interpreter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Lexer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/Parser$TypeInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Parser$TypeInfo.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/Parser.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Parser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Preprocessor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Preprocessor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/TokenValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TokenValidator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/TypeValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TypeValidator.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.u" beforeDir="false" afterPath="$PROJECT_DIR$/test.u" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test2.u" beforeDir="false" afterPath="$PROJECT_DIR$/test2.u" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,21 +75,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Unnamed.executor": "Run",
-    "JAR Application.Build & run.executor": "Run",
-    "JAR Application.Unnamed.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/src/java/ulang/pom.xml",
-    "project.structure.last.edited": "Artifacts",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.Build &amp; run.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/src/java/ulang/pom.xml&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveMembersDialog.RECENTS_KEY">
       <recent name="SyntaxDefinitions" />
@@ -239,7 +241,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728493143564</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Added builtin function 'make_array(len: num)' &amp; fixed more bugs">
+      <option name="closed" value="true" />
+      <created>1728496737724</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1728496737724</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -282,7 +292,8 @@
     <MESSAGE value="Fixed TokenValidator throwing a comp-time error for valid syntax. Although, I the fix is quite dubious." />
     <MESSAGE value="Made many fixes." />
     <MESSAGE value="Changed how assignment works." />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed how assignment works." />
+    <MESSAGE value="Added builtin function 'make_array(len: num)' &amp; fixed more bugs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added builtin function 'make_array(len: num)' &amp; fixed more bugs" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -290,5 +301,10 @@
         <breakpoint enabled="true" type="java-exception" />
       </default-breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="JarApplication">
+        <watch expression="peek(0)" language="JAVA" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

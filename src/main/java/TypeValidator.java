@@ -82,8 +82,8 @@ public class TypeValidator {
 
         }
         case Ast.For node -> {
-            validate(node.pre);
-            validate(node.post);
+            if(node.pre  != null) validate(node.pre);
+            if(node.post != null) validate(node.post);
             if(node.pre != null || node.cond != null || node.post != null)
                 assertf_type(node.error, SyntaxDefinitions.TYPE_BOOLEAN, node.cond, "'for' statement's middle statement");
 

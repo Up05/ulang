@@ -42,6 +42,7 @@ public class Parser extends Stage<Token> {
         if(are_there(0)) {
             if(peek(0).type == Lexer.Type.INSERTED_FILE) {
                 error_stack.push(new Error(Error.Type.TYPE, peek(0).token));
+                next();
             } else if(peek(0).is("EOF")) {
                 if(error_stack.empty()) return null;
                 error_stack.pop();
@@ -64,7 +65,7 @@ public class Parser extends Stage<Token> {
 
         while(curr < tokens.size()) {
 
-            if(peek(0).type == Lexer.Type.INFORMATIONAL) {
+            if(peek(0).type == Lexer.Type.INFORMATIONAL || peek(0).type == Lexer.Type.INSERTED_FILE) {
                 if(next() == null) break;
                 continue;
             }
@@ -139,8 +140,14 @@ public class Parser extends Stage<Token> {
         TypeInfo res = new TypeInfo();
         if(peek(0).token.equals("array")) {
             next(); // Technically, arrays are heterogeneous. I'll deal with that at validation & runtime
-            res.type = List.class;
-            res.typename = "[] " + next().token;
+            if(peek(0).token.equals("array")) {
+                res = parse_type();
+                res.type = List.class;
+                res.typename = "[] " + res.typename;
+            } else {
+                res.type = List.class;
+                res.typename = "[] " + next().token;
+            }
         } else if (peek(0).token.equals("map")) {
             // ! NYI
             next(); next(); next();
@@ -234,7 +241,7 @@ public class Parser extends Stage<Token> {
 
         if(left == null) return null;
 
-        while(true) {
+        while(are_there(2)) {
             Ast node = parse_increasing_precedence(left, min_prec);
             if(node == left) break; // I should go back to .equals()
             left = node;

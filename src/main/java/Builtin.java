@@ -7,6 +7,8 @@ public class Builtin {
 
     public static final Map<String, String> RETURN_TYPES = Map.of(
         "register_error", SyntaxDefinitions.TYPE_BOOLEAN,
+        "char_at", SyntaxDefinitions.TYPE_CHAR,
+        "substring", SyntaxDefinitions.TYPE_STRING,
         "pop", SyntaxDefinitions.TYPE_ANY, // THIS SUCKS MAN...
         "remove", SyntaxDefinitions.TYPE_ANY, // THIS SUCKS MAN...
         "len", SyntaxDefinitions.TYPE_NUMBER,
@@ -44,13 +46,28 @@ public class Builtin {
         return true;
     }
 
+    public char char_at(List<Object> args) {
+        return ((String) args.get(0)).charAt(((Number) args.get(1)).intValue());
+    }
+
+    public String substring(List<Object> args) {
+        int from = ((Number) args.get(1)).intValue();
+        int to;
+        String str = ((String) args.get(0));
+
+        if(args.size() > 2) to = ((Number) args.get(2)).intValue();
+        else to = str.length();
+
+        return str.substring(from, to);
+    }
+
     public void append(List<Object> args) {
         List list = (List) args.get(0);
         list.add(args.get(1));
     }
 
     public List make_array(List<Object> args) {
-        return new ArrayList(Collections.nCopies(((Number) args.get(0)).intValue(), 0));
+        return new ArrayList(Collections.nCopies(((Number) args.get(0)).intValue(), null));
     }
 
     public Object pop(List<Object> args) {
