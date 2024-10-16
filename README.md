@@ -6,8 +6,9 @@ My small programming language, that, **one day**, may become a system-agnostic w
 ## Comments
 
 ```Python
-# I just use the Python's/TOML's/... '#', 
+# Comments start with '#' and end with the line, just like in Python, Unix Shell or TOML. 
 # I like it much more than '//' or '--' and I use ';' and '%' elsewhere
+# I also do not believe that '/* */' is all that useful...
 ```
 
 ## Variables
@@ -23,26 +24,28 @@ a = a + 2
 println(a)
 ```
 Unlike in most languages that use the `:=` operator, there is no type inference yet, 
-so you cannot omit the type.
+so you cannot omit the type, i.e.: this is invalid: `a := 5`
 
 ## Types
 
 ```
-num    -- a 64 bit floating point number, that, here, represents any number
-string -- Java's String type
-bool   -- a boolean that's that.
+num      a 64 bit floating point number, that, here, represents any number
+string   Java's String type
+bool     just a boolean.
+char     utf8 symbol (currently, just Java's char (probably, 2 bytes))
 
-[] <type> -- Java's dynamic List<> wrapper.  
-             It will have individual item type-checking the in the future. 
-[map] <t> <t> -- NYI
+[] <type>         Java's dynamic List<> wrapper.  
+[] [] [] <type>   nesting arrays is supported.
 ```
+*There are no integer types, since I do not yet have bitwise operators and possibility for cache coherency*
+*Although, in case, I will want to interface with other languages, I have reserved Rust-like fixed-width int type names*
 
 ## Literals
 
-Strings are in double quotes: `"`, characters will be in single quotes `'`   
+Strings are in double quotes: `"`, characters *will be* in single quotes `'`   
 Numbers are `<digits>[.<digits>]`, e.g.: `1`, `32767`, `1.0`, `5.0`...  
-Bools are: `<true>` or `<false>`  
-Arrays are: `[` followed by any number of elements and optional commas between, then `]`
+Bools are: `true` or `false`  
+Arrays are: `[` followed by any number of elements and optional commas between them
 
 ## Comma omission
 Commas are optional in function declaration, calling and arrays. 
@@ -55,26 +58,26 @@ N : num = -0.5; P : num = 0.5
 pts : [] num = [ N N N  N P P  P P N  P N P ]
 ```
 *But be careful with commiting commas, since, what you may consider, a unary operator,
-may be parsed as a binary operator, take this for example: `[-1, -2  -3  -4]`
+could in fact be a binary operator, take this for example: `[-1, -2  -3  -4]`
 the resulting array would be: `[-1, -9]`*
 
 ## Operators
 
-A table of all operators and their precedence. Also, there is no short-circuiting here.
-```
+A table of all operators and their precedence.
+```Ruby
 Binary operators             Unary operators
  .                            + -
  * / %                        !
  + -
  == != < > <= >=
- && ||
+ && ||            # Btw, there is no short-circuiting
 ```
 *Unary go before binary. Which, I just realized, !struct.a would be (!struct).a, 
-but that's illogical either way, because, for example: I don't have structs yet.*
+but that's illogical either way, because, for example: I don't have structs...*
 
 ## Functions
 
-Declaration: `func <name>(<arg>: <type>[ = <default value>]) [<return type>] {...}`, it's very similar to Go  
+Declaration: `func <name>(<arg>: <type>[ = <default value>]) [<return type>] {...}`,  
 Calling: `<name>(<expr>)`
 
 There is no C ABI or interfacing with Java, since I'm still unsure on whether I'll keep this
@@ -84,10 +87,14 @@ And so, I have the most runtime-agnostic solution, which is just a couple of my 
 func print(args: ..any)
 func println(args: ..any)
 
- # I will talk about this more later
+ # More in "Errors" section
 func handle(error: num)
-func register_error(value: num  string: name) -> bool
+func register_error(value: num  string: name) bool
 
+func char_at(str: string, index: num) char
+func substring(str: string, from: num, to: num) string
+
+func make_array(initial_length: num) [] any  # items 0..=initial_length are filled with `null`
 func append(list: [] any, value: any)
 func pop(list: [] any) any
 func remove(list: [] any, index: num) any # decimals get truncated to int
@@ -95,7 +102,7 @@ func len(list: [] any) int
 ```
 
 Example:
-```
+```Go
 func array_contains_num(array: [] num  a: num) bool {
     for i: num = 0; i < len(array); i = i + 1 {
         if array[i] == a do return true
@@ -141,11 +148,11 @@ if <expr> { ... }
 
 ## Preprocessor
 
-Currently, there is only a single preprocessor derictive: `$insert(<filename>)`. 
+Currently, there is only a single preprocessor directive: `$insert "filename"`. 
 It simply replaces itself with the contents of another file. 
 You can do this ANYWHERE in the program. 
 
-Although, generally, you should `$insert(std.u)` at the top of your file to include the standard library and 'error' variable
+Although, generally, you should `$insert "std.u"` at the top of your file to include the standard library and 'error' variable
 
 ## Errors
 
