@@ -121,8 +121,10 @@ public class Parser extends Stage<Token> {
                 .bind(this::parse_const)
                 .bind(this::parse_unary_op)
                 .bind(this::parse_array)
+                .bind(this::parse_type_definition)
                 .bind(this::parse_var)
                 .unwrap();
+
         } catch(ParserException e) {
             throw e;
         } catch(Exception ignored) { ignored.printStackTrace(); }
@@ -194,7 +196,8 @@ public class Parser extends Stage<Token> {
     }
 
     private Ast.Var parse_var() throws ParserException {
-        if(!could_be_ident(peek(0).token)) return null;
+        // if(!could_be_ident(peek(0).token)) return null; // wtf?
+        if(peek(0).type != Lexer.Type.VARIABLE) return null;
         // TODO: I guess, check if declared & (maybe not a keyword)
         Ast.Var var = make(Ast.Var.class, error_stack.peek());
         var.name = next().token;
@@ -289,6 +292,15 @@ public class Parser extends Stage<Token> {
             node.ret_typename = type_info.typename;
             types.put(node.name, node.ret_typename);
         }
+
+        if(peek(0).type == Lexer.Type.KEYWORD) {
+            node.foreign = next().is("foreign");
+        }
+        node.path = next().token; // I might need to substring here? No idea...
+        // TODO: FINISH WITH THE TOKENVALIDATION OF THIS AND THEN THE TYPEVALIDATION AND ALSO THE BUILTIN STUFF?
+        // TODO: ALSO DO THE NEW(TYPE, CONSTRUCTOR_VALUES...)
+        // TODO: ALSO ADD `var: ..Type` syntax (varargs)
+
         node.body = parse_block();
         return node;
     }
@@ -403,6 +415,16 @@ public class Parser extends Stage<Token> {
         }
         next(); // skips ']'
         return array;
+    }
+
+    private Ast parse_type_definition() throws ClassNotFoundException {
+        if(peek(0).type != Lexer.Type.TYPE_DECL) return null;
+        // This is quite cool actually!
+        Class prev = SyntaxDefinitions.types.get(peek(0).token);
+        error_stack.peek().warnf(prev == null, "Redefinition of a type", "Found a redefinition of type '%s'! '%s' -> '%s'\n", peek(0).token, prev != null ? prev.getName() : "", peek(1).token);
+        SyntaxDefinitions.types.put(peek(0).token, Class.forName(peek(1).token, false, null));
+        skip(2);
+        return new Ast();
     }
 
     private String fetch_type_of(Ast ast) {

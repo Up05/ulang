@@ -89,7 +89,7 @@ public class TypeValidator {
 
             for(Ast child : node.body) validate(child);
         }
-        default -> System.out.println("TypeValidator skipped an ast node...");
+        default -> {}
         // Ast.Ret is validated inside Ast.FnDecl. Why would anyone put it outside a function?
         }
 

@@ -18,7 +18,8 @@ public class Builtin {
     public void print(List<Object> args) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < args.size(); i++) {
-            b.append(args.get(i).toString());
+            if(args.get(i) == null) b.append("null");
+            else b.append(args.get(i).toString());
             if(i != args.size() - 1) b.append(", ");
         }
         System.out.print(b);
@@ -27,7 +28,8 @@ public class Builtin {
     public void println(List<Object> args) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < args.size(); i++) {
-            b.append(args.get(i).toString());
+            if(args.get(i) == null) b.append("null");
+            else b.append(args.get(i).toString());
             if(i != args.size() - 1) b.append(", ");
         }
         System.out.println(b);

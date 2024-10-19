@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,8 +33,7 @@ public class Preprocessor {
                 tokens.set(i + 1, "push");
                 tokens.addAll(i + 3, new_tokens);
                 i += 2;
-            }           
-
+            }
 
         }
         return tokens;

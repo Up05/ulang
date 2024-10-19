@@ -19,7 +19,7 @@ public class Ast {
     // static class JavaFunc extends Ast { String path; } // Because I might compile to C. I will NEED built-ins either way
 
     static class Decl   extends Ast { String name; Class type; String typename; Ast value; }
-    static class FnDecl extends Ast { String name; Class ret; String ret_typename; List<Ast.Decl> args; List<Ast> body; }
+    static class FnDecl extends Ast { String name; Class ret; String ret_typename; List<Ast.Decl> args; List<Ast> body; Boolean foreign; String path; }
 
     static class Var    extends Ast { String name; Ast assignment; }
     static class Const  extends Ast { Object value; String typename; }

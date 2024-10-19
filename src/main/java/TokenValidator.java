@@ -70,6 +70,7 @@ public class TokenValidator extends Stage<String> {
             .bind(this::v_decl)
             .bind(this::v_func_call)
             .bind(this::v_unary_operator)
+            .bind(this::v_typedef)
             .bind(this::v_const)
             .bind(this::v_var)
             .bind(this::skip_some_tokens)
@@ -292,6 +293,18 @@ public class TokenValidator extends Stage<String> {
         if(peek(0).equals("=")) next();
     }
 
+    private boolean v_typedef() throws Exception {
+        if(!peek(0).equals("type")) return false;
+        next();
+        String typename = next();
+        validate_identifier(typename, "'type' definition statement", typename);
+        assertf(next().equals("="), "Expected '='", "Expected '=' after 'type %s'", typename);
+        assertf(next().equals("foreign"), "Only 'foreign' allowed", "Structures are NYI in the language. You must declare types by using: 'type %s = foreign java.path.Class'", typename);
+        assertf(peek(0).charAt(0) == '"' || peek(0).charAt(0) == '\'',
+            "'type' definition path not in quotes", "When specifying a path in 'type' statement, please put the path in quotes, since you can do e.g.: '[[[I' to get 'int[][][]'");
+        return true;
+    }
+
     private boolean v_block() {
         if(peek(0).equals("do")) {
             next();
@@ -305,6 +318,7 @@ public class TokenValidator extends Stage<String> {
 
     /** @param in_where is meant to be a formatted string finishing the sentence:
     *   <b>"Found bad character: '%c' in the "</b> with, e.g.: "name of a variable: '%s'"  */
+
     private void validate_identifier(String token, String in_where, String identifier) {
         char bad_char = Validator.find_bad_char_in_name(token);
         assertf(bad_char == 0, "Invalid identifier", "Found bad character: '%c' in the " + in_where, bad_char, identifier);

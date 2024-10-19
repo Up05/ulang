@@ -34,7 +34,7 @@ public class Interpreter {
         case Ast.Var node -> eval(node);
         case Ast.Key node -> index_into(node);
         // delete this eventually
-        default -> throw new IllegalStateException("Unexpected value: " + ast);
+        default -> { }
         }
     }
 

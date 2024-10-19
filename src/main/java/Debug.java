@@ -112,7 +112,7 @@ public class Debug {
             b.append('$').append(node.name);
             if(node.assignment != null) b.append(" = ").append(zip(node.assignment));
         }
-        default -> throw new IllegalStateException("Unexpected value: " + ast);
+        default -> b.append("junk");
         }
 
         b.append(")");

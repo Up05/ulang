@@ -35,12 +35,14 @@ public class SyntaxDefinitions {
     static final String TYPE_CHAR    = "char";
     static final String TYPE_ANY     = "any";
 
-    static Map<String, Class> types = Map.of(
-        TYPE_NUMBER,  Double.class,
-        TYPE_BOOLEAN, Boolean.class,
-        TYPE_STRING,  String.class,
-        TYPE_CHAR,    Character.class
-    );
+    static HashMap<String, Class> types = new HashMap<>();
+    static {
+        types.putAll(Map.of(
+            TYPE_NUMBER,  Double.class,
+            TYPE_BOOLEAN, Boolean.class,
+            TYPE_STRING,  String.class,
+            TYPE_CHAR,    Character.class));
+    }
 
     static class OperatorTypeData {
         String out, lhs, rhs;
@@ -78,5 +80,9 @@ public class SyntaxDefinitions {
 
         binary_types.put("==", entype_operator(TYPE_BOOLEAN, TYPE_ANY, TYPE_ANY));
         binary_types.put("!=", entype_operator(TYPE_BOOLEAN, TYPE_ANY, TYPE_ANY));
+    }
+
+    static Boolean is_sep(String token) {
+        return token.equals("\n") || token.equals(";");
     }
 }

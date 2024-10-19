@@ -32,7 +32,10 @@ public class Lexer extends Stage<String> {
 
         CONSTANT, // a.k.a. literal
         VARIABLE,
+
         TYPE,
+        TYPE_DECL,
+        TYPE_PATH,
 
         FUNCTION_DECL,
         FUNCTION_CALL,
@@ -77,14 +80,14 @@ public class Lexer extends Stage<String> {
                 .bind(this::lex_preproc)
                 .bind(this::lex_keyword)
                 .bind(this::lex_info)
-                .bind(this::lex_type)
+                // .bind(this::lex_type) // WHY?
+                .bind(this::lex_type_def)
                 .bind(this::lex_operator)
                 .bind(this::lex_delim)
                 .bind(this::lex_const)
-                .bind(this::lex_list)
-                // .bind(this::lex_return_type)
                 .bind(this::lex_func_decl)
                 .bind(this::lex_func_call)
+                .bind(this::lex_list)
                 .bind(this::lex_var)
                 .bind(this::lexer_skip_bad)
                 .unwrap();
@@ -126,13 +129,26 @@ public class Lexer extends Stage<String> {
             return lexed_tokens.add(new Token(next(), Type.SYMBOL));
         return false;
     }
-    private boolean lex_func_decl() {
-        if(peek(0).equals("func")) {
-            lexed_tokens.add(new Token(peek(1), Type.FUNCTION_DECL));
-            skip(2);
-            return true;
+    private boolean lex_func_decl() { // TODO: Totally redid the function, so it works without calling parse_type in the normal parse_expr
+        if(!peek(0).equals("func")) return false;
+        next(); // skips 'func'
+        lexed_tokens.add(new Token(next(), Type.FUNCTION_DECL));
+        next(); // skips '('
+
+        while(true) {
+            if (peek(0).equals(",")) next();
+            if (peek(0).equals("(")) break;
+            lex_var();
         }
-        return false;
+        lex_type(); // return type
+
+        if(peek(0).equals("=")) {
+            next(); // skips '='
+            lexed_tokens.add(new Token(next(), Type.KEYWORD));
+            lexed_tokens.add(new Token(next(), Type.TYPE_PATH));
+        }
+
+        return true;
     }
     private boolean lex_func_call() {
         if(are_there(2) && peek(1).equals("(")) {
@@ -160,7 +176,6 @@ public class Lexer extends Stage<String> {
         return true;
     }
     private boolean lex_type() {
-
         if(peek(0).equals("[")) {
             next();
             if(peek(0).equals("]")) { // declarations, e.g.: a : [] num
@@ -170,7 +185,6 @@ public class Lexer extends Stage<String> {
                     lex_type();
                     return true;
                 }
-                if(!SyntaxDefinitions.types.containsKey(peek(0))) { skip(-2); return false; } // Is this my way of dealing with a map ???
                 lexed_tokens.add(new Token("array", Type.TYPE));
                 lexed_tokens.add(new Token(next(), Type.TYPE));
             } else if(peek(0).equals("map")) { // maps, e.g.: a : [map] string num
@@ -184,11 +198,10 @@ public class Lexer extends Stage<String> {
                 return false;
             }
             return true;
-        } else if(SyntaxDefinitions.types.containsKey(peek(0))) {
+        } else { // TODO: If I will add this back to expr func chain, I need to check whether it is actually a type with SyntaxDeclaration.types (also handle foreign types at lexer)
             lexed_tokens.add(new Token(next(), Type.TYPE));
             return true;
         }
-        return false;
     }
     private boolean is_const(String token) {
         char first = token.charAt(0);
@@ -235,6 +248,19 @@ public class Lexer extends Stage<String> {
             return lexed_tokens.add(new Token(next(), Type.CONTAINER));
         return false;
     }
+    private boolean lex_type_def() {
+        // type File = foreign "java.util.File"
+        if(!peek(0).equals("type")) return false;
+        next();
+
+        lexed_tokens.add(new Token(next(), Type.TYPE_DECL));
+        next(); // skips '='
+        next(); // we just assume 'foreign'
+
+        lexed_tokens.add(new Token(peek(0).substring(1, next().length() - 1), Type.TYPE_PATH));
+        return true;
+    }
+
 
     private int matching_operator_chars(String[] all) {
         for(String op : all) {
