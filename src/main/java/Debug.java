@@ -88,8 +88,9 @@ public class Debug {
         }
         case Ast.FnDecl node -> {
             b.append(node.name).append(" -> ").append(node.ret_typename);
-            for(Ast arg   : node.args) b.append(zip(arg));
-            for(Ast child : node.body) b.append(zip(child));
+            for(Ast arg : node.args) b.append(zip(arg));
+            if(node.foreign) b.append("(@ ").append(node.path).append(')');
+            else for(Ast child : node.body) b.append(zip(child));
         }
         case Ast.For node -> {
             b.append("for")

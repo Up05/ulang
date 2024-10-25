@@ -278,13 +278,11 @@ public class Parser extends Stage<Token> {
         node.args = new ArrayList<>();
         node.body = new ArrayList<>();
 
-        next(); // skips '('
-        while(!peek(0).is(")")) {
+        while(peek(0).type == Lexer.Type.VARIABLE) {
             Ast.Decl arg = parse_decl();
             assertf(arg != null, "Failed to parse a function parameter: %s", peek(0).token);
             node.args.add(arg);
         }
-        next(); // skips ')'
 
         if(peek(0).type == Lexer.Type.TYPE) {
             TypeInfo type_info = parse_type();
@@ -295,13 +293,16 @@ public class Parser extends Stage<Token> {
 
         if(peek(0).type == Lexer.Type.KEYWORD) {
             node.foreign = next().is("foreign");
+            node.path = next().token;
+            node.path = node.path.substring(1, node.path.length() - 1);
+        } else {
+            node.body = parse_block();
         }
-        node.path = next().token; // I might need to substring here? No idea...
-        // TODO: FINISH WITH THE TOKENVALIDATION OF THIS AND THEN THE TYPEVALIDATION AND ALSO THE BUILTIN STUFF?
+
+
         // TODO: ALSO DO THE NEW(TYPE, CONSTRUCTOR_VALUES...)
         // TODO: ALSO ADD `var: ..Type` syntax (varargs)
 
-        node.body = parse_block();
         return node;
     }
 
@@ -422,7 +423,9 @@ public class Parser extends Stage<Token> {
         // This is quite cool actually!
         Class prev = SyntaxDefinitions.types.get(peek(0).token);
         error_stack.peek().warnf(prev == null, "Redefinition of a type", "Found a redefinition of type '%s'! '%s' -> '%s'\n", peek(0).token, prev != null ? prev.getName() : "", peek(1).token);
-        SyntaxDefinitions.types.put(peek(0).token, Class.forName(peek(1).token, false, null));
+        String path = peek(1).token;
+        path = path.substring(1, path.length() - 1);
+        SyntaxDefinitions.types.put(peek(0).token, Class.forName(path, false, null));
         skip(2);
         return new Ast();
     }

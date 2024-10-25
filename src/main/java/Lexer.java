@@ -35,7 +35,7 @@ public class Lexer extends Stage<String> {
 
         TYPE,
         TYPE_DECL,
-        TYPE_PATH,
+        FOREIGN_PATH,
 
         FUNCTION_DECL,
         FUNCTION_CALL,
@@ -133,19 +133,21 @@ public class Lexer extends Stage<String> {
         if(!peek(0).equals("func")) return false;
         next(); // skips 'func'
         lexed_tokens.add(new Token(next(), Type.FUNCTION_DECL));
-        next(); // skips '('
 
+        next(); // skips '('
         while(true) {
             if (peek(0).equals(",")) next();
-            if (peek(0).equals("(")) break;
+            if (peek(0).equals(")")) break;
             lex_var();
         }
-        lex_type(); // return type
+        next(); // skips ')'
+        if(!peek(0).equals("=") && !peek(0).equals("{"))
+            lex_type(); // return type
 
         if(peek(0).equals("=")) {
             next(); // skips '='
             lexed_tokens.add(new Token(next(), Type.KEYWORD));
-            lexed_tokens.add(new Token(next(), Type.TYPE_PATH));
+            lexed_tokens.add(new Token(next(), Type.FOREIGN_PATH));
         }
 
         return true;
@@ -198,7 +200,7 @@ public class Lexer extends Stage<String> {
                 return false;
             }
             return true;
-        } else { // TODO: If I will add this back to expr func chain, I need to check whether it is actually a type with SyntaxDeclaration.types (also handle foreign types at lexer)
+        } else { // TODO: If I will add this back to parse_expr chain, I need to check whether it is actually a type with SyntaxDeclaration.types (also handle foreign types at lexer)
             lexed_tokens.add(new Token(next(), Type.TYPE));
             return true;
         }
@@ -257,7 +259,7 @@ public class Lexer extends Stage<String> {
         next(); // skips '='
         next(); // we just assume 'foreign'
 
-        lexed_tokens.add(new Token(peek(0).substring(1, next().length() - 1), Type.TYPE_PATH));
+        lexed_tokens.add(new Token(peek(0), Type.FOREIGN_PATH));
         return true;
     }
 

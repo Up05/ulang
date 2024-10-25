@@ -1,3 +1,4 @@
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -102,9 +103,20 @@ public class TokenValidator extends Stage<String> {
             tries ++;
         }
         next();
-        if(!peek(0).equals("{")) v_type();
-        assertf(next().equals("{"),             "Missing curly bracket", "Missing block i.e.: '{ ... }' after function: '%s' declaration!", name);
-        assertf(has_closing_paren('{', '}'),    "Missing curly bracket", "Missing '}' after function: '%s' declaration!", name);
+        if(!peek(0).equals("{") && !peek(0).equals("=")) v_type();
+        if(peek(0).equals("{")) {
+            assertf(next().equals("{"), "Missing curly bracket", "Missing block i.e.: '{ ... }' after function: '%s' declaration!", name);
+            assertf(has_closing_paren('{', '}'), "Missing curly bracket", "Missing '}' after function: '%s' declaration!", name);
+        } else if(peek(0).equals("=")) {
+            next(); // skips '='
+            assertf(next().equals("foreign"), "Missing 'foreign' after '='",
+                "You may only assign functions as 'foreign'! E.g.: `func f_delete(file: string) bool = foreign \"java.nio.file.Files.delete\"`");
+            assertf(peek(0).charAt(0) == '"' || peek(0).charAt(0) == '\'',
+                "'type' definition path not in quotes", "When specifying a path in 'type' statement, please put the path in quotes, since you can do e.g.: '[[[I' to get 'int[][][]'");
+            next();
+        } else {
+            assertf(false, "Unexpected symbol after func declaration", "Found an unexpected symbol: '%s' after declaration of: '%s'", peek(0), name);
+        }
         return true;
     }
 
@@ -302,6 +314,7 @@ public class TokenValidator extends Stage<String> {
         assertf(next().equals("foreign"), "Only 'foreign' allowed", "Structures are NYI in the language. You must declare types by using: 'type %s = foreign java.path.Class'", typename);
         assertf(peek(0).charAt(0) == '"' || peek(0).charAt(0) == '\'',
             "'type' definition path not in quotes", "When specifying a path in 'type' statement, please put the path in quotes, since you can do e.g.: '[[[I' to get 'int[][][]'");
+        next();
         return true;
     }
 
