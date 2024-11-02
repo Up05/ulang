@@ -65,9 +65,7 @@ public class Main {
 
         ArrayList<Token> tokens = new Lexer(raw_tokens, in_file.getFileName().toString()).lex();
         Debug.print_lexed_tokens(tokens);
-
-        // System.out.println("---".repeat(24));
-        // new Validator().validate(tokens, in_file.getFileName().toString());
+        SyntaxDefinitions.reset_types();
 
         Ast ast = new Parser(tokens, in_file.getFileName().toString()).parse();
 

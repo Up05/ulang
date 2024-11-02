@@ -58,7 +58,6 @@ public class Lexer extends Stage<String> {
         return peek(0).equals("EOF");
     }
 
-    // unnecessary work, but the parser should become simpler
     public ArrayList<Token> lex() throws Exception {
 
         while(curr < tokens.size()) {
@@ -80,7 +79,7 @@ public class Lexer extends Stage<String> {
                 .bind(this::lex_preproc)
                 .bind(this::lex_keyword)
                 .bind(this::lex_info)
-                // .bind(this::lex_type) // WHY?
+                .bind(this::lex_type)
                 .bind(this::lex_type_def)
                 .bind(this::lex_operator)
                 .bind(this::lex_delim)
@@ -141,6 +140,7 @@ public class Lexer extends Stage<String> {
             lex_var();
         }
         next(); // skips ')'
+
         if(!peek(0).equals("=") && !peek(0).equals("{"))
             lex_type(); // return type
 
@@ -160,9 +160,15 @@ public class Lexer extends Stage<String> {
         return false;
     }
     private boolean lex_var() {
+        if(peek(0).equals(".") && peek(1).equals(".") && peek(2).equals(".")) {
+            lexed_tokens.add(new Token("varargs", Type.VARIABLE));
+            skip(3);
+            return true;
+        }
+
         boolean is_var =
             declared_vars.contains(peek(0)) ||
-            are_there(2) && peek(1).equals(":") || peek(1).equals("=");
+                are_there(2) && peek(1).equals(":") || peek(1).equals("=");
         if(!is_var) return false;
 
         declared_vars.add(peek(0));
@@ -177,7 +183,17 @@ public class Lexer extends Stage<String> {
         }
         return true;
     }
+    private boolean is_type() {
+        if(peek(0).equals("[") && peek(1).equals("]")) {
+            skip(2);
+            boolean is_type = is_type();
+            skip(-2);
+            return is_type; }
+
+        return SyntaxDefinitions.types.containsKey(peek(0));
+    }
     private boolean lex_type() {
+        if(!is_type()) return false;
         if(peek(0).equals("[")) {
             next();
             if(peek(0).equals("]")) { // declarations, e.g.: a : [] num
@@ -199,11 +215,10 @@ public class Lexer extends Stage<String> {
                 skip(-1);
                 return false;
             }
-            return true;
-        } else { // TODO: If I will add this back to parse_expr chain, I need to check whether it is actually a type with SyntaxDeclaration.types (also handle foreign types at lexer)
+        } else {
             lexed_tokens.add(new Token(next(), Type.TYPE));
-            return true;
         }
+        return true;
     }
     private boolean is_const(String token) {
         char first = token.charAt(0);
@@ -252,10 +267,12 @@ public class Lexer extends Stage<String> {
     }
     private boolean lex_type_def() {
         // type File = foreign "java.util.File"
-        if(!peek(0).equals("type")) return false;
+        if(!peek(0).equals("typedef")) return false;
         next();
 
+        SyntaxDefinitions.types.put(peek(0), null); // this will be cleared whenever parsing begins.
         lexed_tokens.add(new Token(next(), Type.TYPE_DECL));
+
         next(); // skips '='
         next(); // we just assume 'foreign'
 

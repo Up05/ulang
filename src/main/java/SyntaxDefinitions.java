@@ -33,16 +33,23 @@ public class SyntaxDefinitions {
     static final String TYPE_BOOLEAN = "bool";
     static final String TYPE_STRING  = "string";
     static final String TYPE_CHAR    = "char";
+    static final String TYPE_TYPE    = "type";
+    static final String TYPE_VARARGS = "...";
     static final String TYPE_ANY     = "any";
 
     static HashMap<String, Class> types = new HashMap<>();
-    static {
+    static public void reset_types() {
+        types.clear();
         types.putAll(Map.of(
             TYPE_NUMBER,  Double.class,
             TYPE_BOOLEAN, Boolean.class,
             TYPE_STRING,  String.class,
-            TYPE_CHAR,    Character.class));
+            TYPE_CHAR,    Character.class,
+            TYPE_TYPE,    Class.class,
+            TYPE_VARARGS, Object[].class,
+            TYPE_ANY,     Object.class));
     }
+    static { reset_types(); }
 
     static class OperatorTypeData {
         String out, lhs, rhs;
@@ -84,5 +91,18 @@ public class SyntaxDefinitions {
 
     static Boolean is_sep(String token) {
         return token.equals("\n") || token.equals(";");
+    }
+
+    // I still do not want to couple this language to Java...
+    static HashMap<String, Class> primitive_java_types = new HashMap<>();
+    static {
+        primitive_java_types.put("byte",    byte.class);
+        primitive_java_types.put("char",    char.class);
+        primitive_java_types.put("boolean", boolean.class);
+        primitive_java_types.put("short",   short.class);
+        primitive_java_types.put("int",     int.class);
+        primitive_java_types.put("long",    long.class);
+        primitive_java_types.put("float",   float.class);
+        primitive_java_types.put("double",  double.class);
     }
 }

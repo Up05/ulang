@@ -51,6 +51,7 @@ public class Interpreter {
         if(ast == null) return null;
         switch(ast) {
         case Ast.Const node -> {
+            if(Objects.equals(node.typename, SyntaxDefinitions.TYPE_TYPE)) return SyntaxDefinitions.types.get(node.value);
             return node.value;
         }
         case Ast.Var node -> {
@@ -109,33 +110,36 @@ public class Interpreter {
             }
         }
         if(decl.foreign) {
+            NewBuiltin.last_error = node.error;
+
             int dot = decl.path.lastIndexOf(".");
+            node.error.assertf(dot != -1, "Expected class to be specified", "You must specify a class path in `foreign \"path.to.class.function\"` expression!");
             try {
                 Class cl = Class.forName(decl.path.substring(0, dot));
-                Method method = cl.getDeclaredMethod(decl.path.substring(dot + 1));
+                Method method = find_matching_method(cl, decl.path.substring(dot + 1), decl);
 
                 Class[] arg_types = method.getParameterTypes();
                 Object[] arguments = new Object[arg_types.length];
 
-                if (!Modifier.isStatic(method.getModifiers())) { // TODO, there should be many an error thrown, but mainly, that on non-static methods, 1st arg MUST be the class
-                    for (int i = 0; i < arg_types.length; i++)
-                        arguments[i] = try_cast_number(eval(decl.args.get(i + 1)), arg_types[i]);
-                    method.invoke(eval(decl.args.get(0)), arguments);
-                } else {
-                    for (int i = 0; i < arg_types.length; i++)
-                        arguments[i] = try_cast_number(eval(decl.args.get(i)), arg_types[i]);
-                    method.invoke(null, arguments);
+                Object this_obj  = null;
+                int param_offset = 0;
+
+                if(!Modifier.isStatic(method.getModifiers())) {
+                    this_obj = eval(node.args[0]); param_offset = 1;
+                    temp_assertf(cl.isInstance(this_obj), "The foreign function: '" + method.getName() + "' is not static, so it's first argument must be the 'this' object!");
                 }
-            } catch(NoSuchMethodException e) {
-                System.out.println();
-                System.out.printf("Could not find foreign method: '%s' in class: '%s'\n Here are all available methods for the class:",
-                    decl.path.substring(dot + 1), decl.path.substring(0, dot));
-                try {
-                    for (Method method : Class.forName(decl.path.substring(0, dot)).getDeclaredMethods())
-                        System.out.println("\t" + method.getName());
-                } catch (ClassNotFoundException ex) { }
-                e.printStackTrace();
-                System.exit(1);
+                for(int i = param_offset; i < arg_types.length; i ++) {
+                    if(decl.args.get(i).typename.equals(SyntaxDefinitions.TYPE_VARARGS) &&
+                        arg_types[i].equals(Object[].class)) {
+                        arguments[i] = new Object[node.args.length - i];
+                        for(int j = i; j < node.args.length; j ++)
+                            ((Object[]) arguments[i])[j - i] = eval(node.args[j]);
+                        break;
+                    }
+                    arguments[i] = try_cast_number(eval(node.args[i]), arg_types[i]);
+                }
+                return method.invoke(this_obj, arguments);
+
             } catch (Exception e) {
                 System.out.println();
                 e.printStackTrace();
@@ -246,29 +250,26 @@ public class Interpreter {
        scopes.pop();
     }
 
-    private Method find_matching_method(Class parent, String name, List<Ast.Decl> args, Boolean is_static) {
+    private Method find_matching_method(Class parent, String name, Ast.FnDecl decl) {
         Method[] methods = parent.getMethods();
         for(Method method : methods) {
             if(!method.getName().equals(name)) continue;
+            Boolean is_static = Modifier.isStatic(method.getModifiers());
 
             Class[] params = method.getParameterTypes();
-            if(params.length != args.size() - (!is_static?1:0)) continue;
+            if(params.length != decl.args.size() - (!is_static?1:0)) continue;
 
-            boolean all_match = false;
+            boolean all_match = true;
             for(int i = 0; i < params.length; i ++) {
-                Class param = params[i];
-                Class arg   = args.get(i + (!is_static?1:0)).type;
-
-                all_match &= params[i].equals(arg)
-                          || param.isPrimitive(); // TODO!  IDK
-
+                Ast.Decl arg = decl.args.get(i + (!is_static?1:0));
+                all_match &= params[i].equals(arg.type) || arg.typename.equals("any");
             }
-
-            // Somehow match the arguments... And deal with both the int and Integer :(
-
+            if(all_match) return method;
         }
 
-        System.exit(1);
+        decl.error.assertf(false,
+            "Missing foreign method", "Could not find a suitable overload for a foreign method! \n" +
+            "Here are some potential methods for class '%s': \n" + debug_get_similar_methods(parent, name), parent.getName());
         return null;
     }
 
@@ -281,26 +282,51 @@ public class Interpreter {
 
     }
 
-    private Object try_cast_number(Object num, Class needed) {
-        Number any = (Number) num;
-        if(needed.equals(boolean.class)) return any.byteValue() == 1;
-        if(needed.equals(char.class))    return (char) any.byteValue();
-        if(needed.equals(byte.class))    return any.byteValue();
-        if(needed.equals(short.class))   return any.shortValue();
-        if(needed.equals(int.class))     return any.intValue();
-        if(needed.equals(long.class))    return any.longValue();
-        if(needed.equals(float.class))   return any.floatValue();
-        if(needed.equals(double.class))  return any.doubleValue();
+    private Object try_cast_number(Object any, Class needed) {
+        if(needed.equals(boolean.class)) return        ((Number) any).byteValue() == 1;
+        if(needed.equals(char.class))    return (char) ((Number) any).byteValue();
+        if(needed.equals(byte.class))    return        ((Number) any).byteValue();
+        if(needed.equals(short.class))   return        ((Number) any).shortValue();
+        if(needed.equals(int.class))     return        ((Number) any).intValue();
+        if(needed.equals(long.class))    return        ((Number) any).longValue();
+        if(needed.equals(float.class))   return        ((Number) any).floatValue();
+        if(needed.equals(double.class))  return        ((Number) any).doubleValue();
 
-        if(needed.equals(Boolean.class)) return Boolean.valueOf(any.byteValue() == 1);
-        if(needed.equals(Character.class))return Character.valueOf((char) any.byteValue());
-        if(needed.equals(Byte.class))    return Byte.valueOf(any.byteValue());
-        if(needed.equals(Short.class))   return Short.valueOf(any.shortValue());
-        if(needed.equals(Integer.class)) return Integer.valueOf(any.intValue());
-        if(needed.equals(Long.class))    return Long.valueOf(any.longValue());
-        if(needed.equals(Float.class))   return Float.valueOf(any.floatValue());
-        if(needed.equals(Double.class))  return Double.valueOf(any.doubleValue());
-        return num;
+        if(needed.equals(Boolean.class)) return Boolean.   valueOf(       ((Number) any).byteValue() == 1);
+        if(needed.equals(Character.class))return Character.valueOf((char) ((Number) any).byteValue());
+        if(needed.equals(Byte.class))    return Byte.      valueOf(       ((Number) any).byteValue());
+        if(needed.equals(Short.class))   return Short.     valueOf(       ((Number) any).shortValue());
+        if(needed.equals(Integer.class)) return Integer.   valueOf(       ((Number) any).intValue());
+        if(needed.equals(Long.class))    return Long.      valueOf(       ((Number) any).longValue());
+        if(needed.equals(Float.class))   return Float.     valueOf(       ((Number) any).floatValue());
+        if(needed.equals(Double.class))  return Double.    valueOf(       ((Number) any).doubleValue());
+        return any;
+    }
+
+    private String debug_get_similar_methods(Class parent, String name) {
+        StringBuilder b = new StringBuilder();
+        Method[] methods = parent.getMethods();
+        for(Method method : methods) {
+            if(!method.getName().equals(name)) continue;
+            b.append('\t').append(method.getName());
+
+            Class[] params = method.getParameterTypes();
+            b.append('(');
+            for(Class param : params) {
+                b.append(param.getSimpleName());
+                // This is actually fine, because I am intentionally shallowly comparing references, which is what 'obj == obj' does in Java.
+                if(params[params.length - 1] != param) b.append(", ");
+            }
+            b.append(')');
+            b.append("  or  ");
+            b.append(method.getName()).append('(');
+            for(Class param : params) {
+                b.append(Util.get_keys_by_value(SyntaxDefinitions.types, param));
+                if (params[params.length - 1] != param) b.append(", ");
+            }
+            b.append(')');
+        }
+        return b.toString();
     }
 
     private void temp_assertf(boolean cond, String msg) {

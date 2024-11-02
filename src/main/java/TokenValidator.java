@@ -98,7 +98,7 @@ public class TokenValidator extends Stage<String> {
             // either way, this class is meant as more of a "scripted" thing to catch all the human errors
             // (as well as to not need to reconfirm assumptions elsewhere)
             assertf(!peek(0).equals("]"), "Brackets on wrong side of type", "The '%s []' should be '[] %s' in function: '%s' declaration", peek(-2), peek(-2), name);
-            v_not_hung(tries, "the parameters of function " + name + " declaration");
+            v_not_hung(tries, "the parameters of function's '" + name + "' declaration");
             if(peek(0).equals(",")) next();
             tries ++;
         }
@@ -122,6 +122,11 @@ public class TokenValidator extends Stage<String> {
 
     private Set<String> declared_vars = new HashSet<>();
     private boolean v_decl() throws Exception {
+        if(are_there(3) && peek(0).equals(".") && peek(1).equals(".")) {
+            assertf(peek(2).equals("."), "Missing period in varargs", "Variable arguments should be specified as such: `func printf(fmt: string, ...)`");
+            skip(3);
+            return true;
+        }
         if(!peek(1).equals(":") && !peek(1).equals("=")) return false;
         String name = next();
 
@@ -149,6 +154,7 @@ public class TokenValidator extends Stage<String> {
             .bind(this::v_func_call)
             .bind(this::v_unary_operator)
             .bind(this::v_var)
+            .bind(this::v_type)
             .bind(this::skip_some_tokens)
             // .bind(this::unexpected_token)
             .unwrap();
@@ -306,7 +312,7 @@ public class TokenValidator extends Stage<String> {
     }
 
     private boolean v_typedef() throws Exception {
-        if(!peek(0).equals("type")) return false;
+        if(!peek(0).equals("typedef")) return false;
         next();
         String typename = next();
         validate_identifier(typename, "'type' definition statement", typename);

@@ -1,6 +1,11 @@
-type File = foreign "java.io.File"
-a: File
-print("AAA")
-func exit(code: num) = foreign "java.lang.System.exit"
-exit(1)
-print("BBB")
+# typedef jint = foreign "int" # func exit(code: jint) = foreign "java.lang.System.exit" # print("AAA") # exit(1) # print("BBB")
+typedef File = foreign "java.io.File"
+func new(obj: type, ...) any = foreign "NewBuiltin._new" # later rename NewBuiltin -> Builtin
+func is_dir(file: File) bool = foreign "java.io.File.isDirectory"
+f: File = new(File, "D:/test.bat")
+println(f)
+println(is_dir(f))
+
+# func as_list(...) [] any = foreign "java.util.Arrays.asList"
+# test: [] num = as_list(3, 2, 1)
+# println(test)

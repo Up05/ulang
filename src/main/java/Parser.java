@@ -43,9 +43,6 @@ public class Parser extends Stage<Token> {
             if(peek(0).type == Lexer.Type.INSERTED_FILE) {
                 error_stack.push(new Error(Error.Type.TYPE, peek(0).token));
                 next();
-            } else if(peek(0).is("EOF")) {
-                if(error_stack.empty()) return null;
-                error_stack.pop();
             } else if(peek(0).is("\n")) {
                 error_stack.peek().line ++;
             }
@@ -70,23 +67,6 @@ public class Parser extends Stage<Token> {
                 continue;
             }
             root.children.add(parse_expr());
-
-            // I remember that there was a reason for me not doing this... But, to be honest, I don't remember it...
-//            Ast node = null;
-//            node = new Monad<>(node, null) // This isn't actually "always null"
-//                .bind(this::parse_func_decl)
-//                .bind(this::parse_decl)
-//                .bind(this::parse_for)
-//                .bind(this::parse_if)
-//                .bind(this::parse_func)
-//                .unwrap();
-//            if(node != null) root.children.add(node);
-//            else {
-//                System.out.println(Debug.zip(parse_expr()));
-//                // assertf(parse_expr() != null, "Found an expression at global level. Please put it into a function.");
-//
-//
-//            }
 
             curr++; // shouldn't need this eventually...
         }
@@ -158,7 +138,7 @@ public class Parser extends Stage<Token> {
             res.type = SyntaxDefinitions.types.get(peek(0).token);
             res.typename = next().token;
         }
-        assertf(res.type != null, "Invalid type: '%s' found!", peek(0).token);
+        assertf(res.type != null, "Invalid type: '%s' found!", res.typename);
         return res;
     }
 
@@ -179,6 +159,14 @@ public class Parser extends Stage<Token> {
 
     private Ast.Decl parse_decl() throws ParserException {
         if(peek(0).type != Lexer.Type.VARIABLE) return null;
+        if(peek(0).is("varargs")) {
+            Ast.Decl node = make(Ast.Decl.class, error_stack.peek());
+            node.name     = "varargs";
+            node.typename = SyntaxDefinitions.TYPE_VARARGS;
+            node.type = Object[].class;
+            next();
+            return node;
+        }
         if(curr + 1 >= tokens.size()) return null;
         if(peek(1).type != Lexer.Type.TYPE) return null;
         Ast.Decl node = make(Ast.Decl.class, error_stack.peek());
@@ -205,23 +193,35 @@ public class Parser extends Stage<Token> {
         return var;
     }
 
-    private Ast.Const parse_const() {
-        if(peek(0).type != Lexer.Type.CONSTANT) return null;
+    private Ast.Const parse_const() throws ParserException {
+        if(peek(0).type == Lexer.Type.CONSTANT) {
 
-        String t = next().token;
-        Ast.Const node = make(Ast.Const.class, error_stack.peek());
+            String t = next().token;
+            Ast.Const node = make(Ast.Const.class, error_stack.peek());
 
-        if(Character.isDigit(t.charAt(0))) {
-            node.value = Double.parseDouble(t);
-            node.typename = "num"; // this sucks
-        } else if(t.startsWith("'") || t.startsWith("\"")) {
-            node.value = t.substring(1, t.length() - 1);
-            node.typename = "string";
-        } else { // if(t.equals("true") || t.equals("false"))
-            node.value = t.equals("true");
-            node.typename = "bool";
+            if (Character.isDigit(t.charAt(0))) {
+                node.value = Double.parseDouble(t);
+                node.typename = "num"; // this sucks
+            } else if (t.startsWith("'") || t.startsWith("\"")) {
+                node.value = t.substring(1, t.length() - 1);
+                node.typename = "string";
+            } else { // if(t.equals("true") || t.equals("false"))
+                node.value = t.equals("true");
+                node.typename = "bool";
+            }
+
+            return node;
+        } else if(peek(0).type == Lexer.Type.TYPE) {
+            Ast.Const node = make(Ast.Const.class, error_stack.peek());
+            TypeInfo type_info = parse_type();
+
+            node.value = type_info.typename;
+            node.typename = SyntaxDefinitions.TYPE_TYPE;
+
+            return node;
         }
-        return node;
+
+        return null;
     }
 
     private Ast.UnaOp parse_unary_op() throws ParserException {
@@ -425,7 +425,9 @@ public class Parser extends Stage<Token> {
         error_stack.peek().warnf(prev == null, "Redefinition of a type", "Found a redefinition of type '%s'! '%s' -> '%s'\n", peek(0).token, prev != null ? prev.getName() : "", peek(1).token);
         String path = peek(1).token;
         path = path.substring(1, path.length() - 1);
-        SyntaxDefinitions.types.put(peek(0).token, Class.forName(path, false, null));
+        if(SyntaxDefinitions.primitive_java_types.containsKey(path))
+             SyntaxDefinitions.types.put(peek(0).token, SyntaxDefinitions.primitive_java_types.get(path));
+        else SyntaxDefinitions.types.put(peek(0).token, Class.forName(path, false, null));
         skip(2);
         return new Ast();
     }

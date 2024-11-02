@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -51,8 +50,10 @@ public class TypeValidator {
             if(args == null)
                 return Builtin.RETURN_TYPES.get(node.name);
             if(args.length > 1)
-                for(int i = 1; i < args.length; i ++)
-                   assertf_type(node.error, args[i], node.args[i - 1], (i + 1) + "th parameter of function " + node.name); // firth, secoth, thith, fourth
+                for(int i = 1; i < args.length; i ++) {
+                    if(args[i].equals(SyntaxDefinitions.TYPE_VARARGS)) break;
+                    assertf_type(node.error, args[i], node.args[i - 1], "parameter #" + (i + 1) + " of function " + node.name);
+                }
             return args[0];
         }
         case Ast.UnaOp node -> {
@@ -108,15 +109,20 @@ public class TypeValidator {
         String type2 = validate(expr);
         if(type == null || type2 == null) {
             System.out.printf("Skipped type checking in '%s' on line %d. In %s\n", error.file, error.line, in_where);
-        } else if(!interchangible(type, type2)) {
+        } else if(!types_match(type, type2)) {
             error.assertf(type.equals(type2), Error.Type.TYPE.name, "Mismatched types: expected '%s', got '%s' in %s", type, type2, in_where);
         }
     }
 
-    private boolean interchangible(String a, String b) {
+    private boolean types_match(String a, String b) {
         if(a.equals(SyntaxDefinitions.TYPE_ANY) || b.equals(SyntaxDefinitions.TYPE_ANY)) return true;
         if(a.startsWith("[] ") || b.startsWith("[] "))
             if(a.endsWith("any") || b.endsWith("any")) return true;
+        // I hate this... But just because of 'SyntaxDefinitions'
+        if(a.equals(SyntaxDefinitions.TYPE_NUMBER) || a.equals(SyntaxDefinitions.TYPE_BOOLEAN) || a.equals(SyntaxDefinitions.TYPE_CHAR))
+            if(SyntaxDefinitions.types.get(b).isPrimitive()) return true;
+        if(b.equals(SyntaxDefinitions.TYPE_NUMBER) || b.equals(SyntaxDefinitions.TYPE_BOOLEAN) || b.equals(SyntaxDefinitions.TYPE_CHAR))
+            if(SyntaxDefinitions.types.get(a).isPrimitive()) return true;
         return a.equals(b);
     }
 
