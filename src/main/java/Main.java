@@ -1,3 +1,5 @@
+import org.lwjgl.opengl.GL33;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -5,6 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.BitSet;
+
+import static org.lwjgl.opengl.GL11C.glClearColor;
 
 public class Main {
 
@@ -43,27 +48,16 @@ public class Main {
             }
         }
 
-
-        // String text = Files.readString(in_file, StandardCharsets.UTF_8);
-        // text = Preprocessor.preprocess(text);
-        // All of these file names and my current compile error system will be deprecated and deleted.
-        // String[] raw_tokens = new Tokenizer().tokenize(text, in_file.getFileName().toString());
-        
         ArrayList<String> prepped_tokens = Preprocessor.preprocess(base, in_file.toString());
 
-        ArrayList<String> raw_tokens = prepped_tokens;
-
-
         System.out.println("---".repeat(24));
-        Debug.print_tokens(raw_tokens);
+        Debug.print_tokens(prepped_tokens);
 
         new TokenValidator(prepped_tokens, in_file.getFileName().toString()).validate();
 
-        // System.exit(0);
-
         System.out.println("---".repeat(24));
 
-        ArrayList<Token> tokens = new Lexer(raw_tokens, in_file.getFileName().toString()).lex();
+        ArrayList<Token> tokens = new Lexer(prepped_tokens, in_file.getFileName().toString()).lex();
         Debug.print_lexed_tokens(tokens);
         SyntaxDefinitions.reset_types();
 
@@ -72,6 +66,7 @@ public class Main {
         Debug.send_ast_to_vis(ast);
 
         new TypeValidator().validate(ast);
+
 
         Interpreter interpreter = new Interpreter((Ast.Root) ast);
         interpreter.interpret(ast);

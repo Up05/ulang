@@ -1,0 +1,38 @@
+typedef GLBitField = foreign "int"
+typedef f32Buffer  = foreign "java.nio.FloatBuffer"
+typedef i32Buffer  = foreign "java.nio.IntBuffer"
+
+# Initial / glfw stuff
+func glfw_init() bool = foreign "org.lwjgl.glfw.GLFW.glfwInit"
+func glfw_create_window(width: num, height: num, title: string, monitor: num, share: num) num = foreign "org.lwjgl.glfw.GLFW.glfwCreateWindow"
+func glfw_make_context_current(window: num) = foreign "org.lwjgl.glfw.GLFW.glfwMakeContextCurrent"
+func glfw_swap_interval(frames: num) = foreign "org.lwjgl.glfw.GLFW.glfwSwapInterval"
+func glfw_show_window(window: num) = foreign "org.lwjgl.glfw.GLFW.glfwShowWindow"
+func gl_create_capabilities() = foreign "org.lwjgl.opengl.GL.createCapabilities" # more so lwjgl_create_cap..
+func glfw_window_should_close(window: num) bool = foreign "org.lwjgl.glfw.GLFW.glfwWindowShouldClose"
+func gl_clear_color(r: num, g: num, b: num, a: num) = foreign "org.lwjgl.opengl.GL11C.glClearColor"
+func gl_clear(bit_set: GLBitField) = foreign "org.lwjgl.opengl.GL11C.glClear"
+func glfw_swap_buffers(window: num) = foreign "org.lwjgl.glfw.GLFW.glfwSwapBuffers"
+func glfw_poll_events() = foreign "org.lwjgl.glfw.GLFW.glfwPollEvents"
+func glfw_terminate() = foreign "org.lwjgl.glfw.GLFW.glfwTerminate"
+
+# vertex buffer objects
+func gl_gen_buffers() num = foreign "org.lwjgl.opengl.GL33.glGenBuffers"
+func gl_bind_buffer(target: num, buffer: num) = foreign "org.lwjgl.opengl.GL33.glBindBuffer"
+func gl_vertex_attrib_pointer(index: num, size: num, type: num, normalized: bool, stride: num, buffer: f32Buffer) = foreign "org.lwjgl.opengl.GL33.glVertexAttribPointer"
+func gl_enable_vertex_attrib_array(index: num) = foreign "org.lwjgl.gl.GL33.glEnableVertexAttribArray"
+func gl_buffer_data()
+func gl_draw_arrays()
+
+# shaders
+func gl_create_program() num = foreign "org.lwjgl.opengl.GL33.glCreateProgram"
+func gl_create_shader(type: num) = foreign "org.lwjgl.opengl.GL33.glCreateShader"
+func gl_shader_source(shader: num, source: string) = foreign "org.lwjgl.opengl.GL33.glShaderSource"
+func gl_compile_shader(shader: num) = foreign "org.lwjgl.opengl.GL33.glCompileShader"
+func gl_get_shader_iv(shader: num, type: num, out: i32Buffer) = foreign "org.lwjgl.opengl.GL33.glGetShaderiv"
+func gl_get_shader_info_log()
+func gl_attach_shader()
+func gl_use_program()
+func gl_link_program(program: num) = foreign "org.lwjgl.opengl.GL33.glLinkProgram"
+
+# java buffers  (they are used as pointer replacements)

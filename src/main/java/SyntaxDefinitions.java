@@ -42,9 +42,9 @@ public class SyntaxDefinitions {
         types.clear();
         types.putAll(Map.of(
             TYPE_NUMBER,  Double.class,
-            TYPE_BOOLEAN, Boolean.class,
+            TYPE_BOOLEAN, boolean.class,
             TYPE_STRING,  String.class,
-            TYPE_CHAR,    Character.class,
+            TYPE_CHAR,    char.class,
             TYPE_TYPE,    Class.class,
             TYPE_VARARGS, Object[].class,
             TYPE_ANY,     Object.class));

@@ -296,6 +296,7 @@ public class Parser extends Stage<Token> {
             node.path = next().token;
             node.path = node.path.substring(1, node.path.length() - 1);
         } else {
+            node.foreign = false;
             node.body = parse_block();
         }
 
@@ -328,7 +329,7 @@ public class Parser extends Stage<Token> {
         Ast.For node = make(Ast.For.class, error_stack.peek());
         node.body = new ArrayList<>();
 
-        if(!peek(0).is("{") && !peek(0).is("do")) node.pre = parse_expr();
+        if(!peek(0).is("{") && !peek(0).is("do")) node.pre = parse_binary_op(-1);
         if(peek(0).is(";")) {
             next();
             node.cond = parse_binary_op(-1);
@@ -420,14 +421,13 @@ public class Parser extends Stage<Token> {
 
     private Ast parse_type_definition() throws ClassNotFoundException {
         if(peek(0).type != Lexer.Type.TYPE_DECL) return null;
-        // This is quite cool actually!
         Class prev = SyntaxDefinitions.types.get(peek(0).token);
         error_stack.peek().warnf(prev == null, "Redefinition of a type", "Found a redefinition of type '%s'! '%s' -> '%s'\n", peek(0).token, prev != null ? prev.getName() : "", peek(1).token);
         String path = peek(1).token;
         path = path.substring(1, path.length() - 1);
         if(SyntaxDefinitions.primitive_java_types.containsKey(path))
              SyntaxDefinitions.types.put(peek(0).token, SyntaxDefinitions.primitive_java_types.get(path));
-        else SyntaxDefinitions.types.put(peek(0).token, Class.forName(path, false, null));
+        else SyntaxDefinitions.types.put(peek(0).token, Class.forName(path));
         skip(2);
         return new Ast();
     }

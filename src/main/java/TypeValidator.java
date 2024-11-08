@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -49,10 +50,13 @@ public class TypeValidator {
             String[] args = func_ret_and_args.get(node.name);
             if(args == null)
                 return Builtin.RETURN_TYPES.get(node.name);
+            node.error.assertf(node.args.length <= args.length, "Missing parameter",
+                "Missing parameter(s) in function %s%s", node.name, Debug.stringify_param_types(Arrays.copyOfRange(args, 1, args.length)));
             if(args.length > 1)
                 for(int i = 1; i < args.length; i ++) {
                     if(args[i].equals(SyntaxDefinitions.TYPE_VARARGS)) break;
-                    assertf_type(node.error, args[i], node.args[i - 1], "parameter #" + (i + 1) + " of function " + node.name);
+                    assertf_type(node.error, args[i], node.args[i - 1],
+                        "parameter #" + (i + 1) + " of function " + node.name);
                 }
             return args[0];
         }

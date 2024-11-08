@@ -24,17 +24,23 @@ public class Util {
         return false;
     }
 
+    public static <T> boolean is_any_of(T a, T... values) {
+        for(T v : values) if(a.equals(v)) return true;
+        return false;
+    }
+
     public static <K, V> String get_keys_by_value(Map<K, V> map, V value) {
         StringBuilder b = new StringBuilder();
         Boolean needs_seperator = false;
         for(Map.Entry<K, V> entry : map.entrySet()) {
-            if(needs_seperator) {
-                b.append('|');
-                needs_seperator = false;
-            }
             if(entry.getValue().equals(value)) {
+                if(needs_seperator) {
+                    b.append('|');
+                    needs_seperator = false;
+                } else {
+                    needs_seperator = true;
+                }
                 b.append(entry.getKey());
-                needs_seperator = true;
             }
         }
         return b.toString();

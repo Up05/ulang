@@ -120,4 +120,22 @@ public class Debug {
         return b.toString();
     }
 
+    public static String stringify_param_types(Class[] params) {
+        String[] typenames = new String[params.length];
+        for(int i = 0; i < params.length; i ++) typenames[i] = params[i].getSimpleName();
+        return stringify_param_types(typenames);
+    }
+
+    public static String stringify_param_types(String[] types) {
+        StringBuilder b = new StringBuilder();
+        b.append('(');
+        for(int i = 0; i < types.length; i ++) {
+            b.append(types[i]);
+            if(i != types.length - 1) b.append(", ");
+        }
+        b.append(')');
+        return b.toString();
+
+    }
+
 }

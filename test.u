@@ -1,11 +1,23 @@
-# typedef jint = foreign "int" # func exit(code: jint) = foreign "java.lang.System.exit" # print("AAA") # exit(1) # print("BBB")
-typedef File = foreign "java.io.File"
-func new(obj: type, ...) any = foreign "NewBuiltin._new" # later rename NewBuiltin -> Builtin
-func is_dir(file: File) bool = foreign "java.io.File.isDirectory"
-f: File = new(File, "D:/test.bat")
-println(f)
-println(is_dir(f))
+$insert "std.u"
+$insert "opengl.u"
 
-# func as_list(...) [] any = foreign "java.util.Arrays.asList"
-# test: [] num = as_list(3, 2, 1)
-# println(test)
+assert(glfw_init(), "Failed to initialize glfw!")
+window: num = glfw_create_window(600, 600, "ulang example #1", 0, 0)
+assert(window != 0, "Failed to create a window!")
+
+glfw_make_context_current(window)
+glfw_swap_interval(1)
+glfw_show_window(window)
+
+gl_create_capabilities()
+
+gl_clear_color(1, 1, 0, 0)
+
+for !glfw_window_should_close(window) {
+    gl_clear(16384 + 256) # COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT
+    glfw_swap_buffers(window)
+    glfw_poll_events()
+
+}
+
+glfw_terminate()

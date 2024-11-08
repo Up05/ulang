@@ -244,7 +244,7 @@ public class TokenValidator extends Stage<String> {
     private boolean v_unary_operator() throws Exception {
         int unary = matching_operator_chars(SyntaxDefinitions.unary_operators);
         if(unary == 0) return false;
-        skip(unary + 1);
+        skip(unary);
         v_expr();
         return true;
     }

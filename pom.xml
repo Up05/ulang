@@ -26,4 +26,19 @@
         <exec.mainClass>Main</exec.mainClass>
     </properties>
 
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.joml/joml -->
+        <dependency>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>1.10.8</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.lwjgl/lwjgl -->
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl</artifactId>
+            <version>3.3.4</version>
+        </dependency>
+    </dependencies>
+
 </project>

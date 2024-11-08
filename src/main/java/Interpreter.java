@@ -43,7 +43,10 @@ public class Interpreter {
     // To check where variable was declared in a different scope or not to check whether variable was declared in a different scope?
     private void declare_var(Ast.Decl node) {
         Object val = eval(node.value);
-        temp_assertf(is_of_type(val, node.type), "Mismatched types! " + (val == null ? "null" : val.getClass().getSimpleName()) + " : " + node.type.getSimpleName());
+        if(val != null)
+            node.error.assertf(is_of_type(node.type, val.getClass(), node.typename), "Mismatched types",
+                "given '%s', expected '%s' or '%s'!", val.getClass().getSimpleName(), node.typename, node.type.getSimpleName());
+
         scopes.peek().put(node.name, val);
     }
 
@@ -92,10 +95,10 @@ public class Interpreter {
                 if(node.name.equals(decl_node.name))
                     decl = decl_node;
         }
-
-        if(decl == null) {
-            return call_builtin(node);
-        }
+        node.error.assertf(decl != null, "Function is not declared", "Trying to call an undeclared function '%s'!");
+        // if(decl == null) {
+        //     return call_builtin(node);
+        // }
 
         scopes.push(new HashMap<>());
 
@@ -200,8 +203,8 @@ public class Interpreter {
         case ">" : return ((Number) a).doubleValue() > ((Number) b).doubleValue();
         case "<=": return ((Number) a).doubleValue() <= ((Number) b).doubleValue();
         case ">=": return ((Number) a).doubleValue() >= ((Number) b).doubleValue();
-        case "==": return ((Number) a).doubleValue() == ((Number) b).doubleValue();
-        case "!=": return ((Number) a).doubleValue() != ((Number) b).doubleValue();
+        case "==": return a.equals(b);
+        case "!=": return !a.equals(b);
 
         case "+": return ((Number) a).doubleValue() + ((Number) b).doubleValue();
         case "-": return ((Number) a).doubleValue() - ((Number) b).doubleValue();
@@ -262,38 +265,35 @@ public class Interpreter {
             boolean all_match = true;
             for(int i = 0; i < params.length; i ++) {
                 Ast.Decl arg = decl.args.get(i + (!is_static?1:0));
-                all_match &= params[i].equals(arg.type) || arg.typename.equals("any");
+                all_match &= is_of_type(params[i], arg.type, arg.typename);
             }
             if(all_match) return method;
         }
 
+        Class[] param_types = new Class[decl.args.size()];
+        for(int i = 0; i < decl.args.size(); i ++) param_types[i] = decl.args.get(i).type;
+
         decl.error.assertf(false,
-            "Missing foreign method", "Could not find a suitable overload for a foreign method! \n" +
-            "Here are some potential methods for class '%s': \n" + debug_get_similar_methods(parent, name), parent.getName());
+            "Missing foreign method", "Could not find a suitable overload for foreign method\n%s%s\n" +
+            "Here are some potential methods for class '%s': \n%s",
+            name, Debug.stringify_param_types(param_types), parent.getName(), debug_get_similar_methods(parent, name));
         return null;
     }
 
     // I don't generally like this kind of name, I prefer: 'are_types_matching' or smth, but can't think of anything better rn
-    private boolean is_of_type(Object a, Class b) {
-        if(a == null) return true;
-        // MAYBE cast-able?
-        return b.isInstance(a);
-        // return a.getClass().equals(b);
-
+    private boolean is_of_type(Class a, Class b, String b_typename) {
+        return a.isAssignableFrom(b)
+            || b_typename.equals(SyntaxDefinitions.TYPE_ANY)
+            || (Number.class.isAssignableFrom(b) && b_typename.equals(SyntaxDefinitions.TYPE_NUMBER));
     }
 
     private Object try_cast_number(Object any, Class needed) {
-        if(needed.equals(boolean.class)) return        ((Number) any).byteValue() == 1;
-        if(needed.equals(char.class))    return (char) ((Number) any).byteValue();
         if(needed.equals(byte.class))    return        ((Number) any).byteValue();
         if(needed.equals(short.class))   return        ((Number) any).shortValue();
         if(needed.equals(int.class))     return        ((Number) any).intValue();
         if(needed.equals(long.class))    return        ((Number) any).longValue();
         if(needed.equals(float.class))   return        ((Number) any).floatValue();
         if(needed.equals(double.class))  return        ((Number) any).doubleValue();
-
-        if(needed.equals(Boolean.class)) return Boolean.   valueOf(       ((Number) any).byteValue() == 1);
-        if(needed.equals(Character.class))return Character.valueOf((char) ((Number) any).byteValue());
         if(needed.equals(Byte.class))    return Byte.      valueOf(       ((Number) any).byteValue());
         if(needed.equals(Short.class))   return Short.     valueOf(       ((Number) any).shortValue());
         if(needed.equals(Integer.class)) return Integer.   valueOf(       ((Number) any).intValue());
@@ -309,22 +309,22 @@ public class Interpreter {
         for(Method method : methods) {
             if(!method.getName().equals(name)) continue;
             b.append('\t').append(method.getName());
-
             Class[] params = method.getParameterTypes();
-            b.append('(');
-            for(Class param : params) {
-                b.append(param.getSimpleName());
-                // This is actually fine, because I am intentionally shallowly comparing references, which is what 'obj == obj' does in Java.
-                if(params[params.length - 1] != param) b.append(", ");
-            }
-            b.append(')');
+            b.append(Debug.stringify_param_types(params));
             b.append("  or  ");
             b.append(method.getName()).append('(');
+            int i = 0;
             for(Class param : params) {
-                b.append(Util.get_keys_by_value(SyntaxDefinitions.types, param));
-                if (params[params.length - 1] != param) b.append(", ");
+                String keys = Util.get_keys_by_value(SyntaxDefinitions.types, param);
+                b.append(keys);
+                if(keys.length() == 0) {
+                    if(param.isPrimitive()) b.append("num");
+                    else b.append("<unknown type>");
+                }
+                if(i != params.length - 1) b.append(", ");
+                i ++;
             }
-            b.append(')');
+            b.append(')').append('\n');
         }
         return b.toString();
     }
@@ -332,6 +332,6 @@ public class Interpreter {
     private void temp_assertf(boolean cond, String msg) {
         if(cond) return;
 
-        System.out.println(msg);
+        System.out.println("[INTERPRETER TEMP ASSERTF] " + msg);
     }
 }
