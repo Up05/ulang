@@ -1,4 +1,3 @@
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -106,15 +105,22 @@ public class Interpreter {
             declare_var(arg);
         }
 
-        for(Ast arg : node.args) {
-            for(Ast.Decl decl_arg : decl.args) {
-                Object v = eval(arg);
-                scopes.peek().put(decl_arg.name, v);
+        for(int i = 0; i < node.args.length; i ++) {
+            if(decl.args.get(i).typename.equals(SyntaxDefinitions.TYPE_VARARGS)) {
+                Object[] arguments = new Object[node.args.length - i];
+                for(int j = 0; j < node.args.length; j ++) {
+                    arguments[j - i] = node.args[j];
+                }
+                break;
             }
+            scopes.peek().put(decl.args.get(i).name, eval(node.args[i]));
         }
+        if(!decl.args.isEmpty() && decl.args.getLast().typename.equals(SyntaxDefinitions.TYPE_VARARGS) && decl.args.size() + 1 == node.args.length) {
+            scopes.peek().put(decl.args.getLast().name, new Object[0]);
+        }
+
         if(decl.foreign) {
             NewBuiltin.last_error = node.error;
-
             int dot = decl.path.lastIndexOf(".");
             node.error.assertf(dot != -1, "Expected class to be specified", "You must specify a class path in `foreign \"path.to.class.function\"` expression!");
             try {
@@ -136,10 +142,10 @@ public class Interpreter {
                         arg_types[i].equals(Object[].class)) {
                         arguments[i] = new Object[node.args.length - i];
                         for(int j = i; j < node.args.length; j ++)
-                            ((Object[]) arguments[i])[j - i] = eval(node.args[j]);
+                            ((Object[]) arguments[i - param_offset])[j - i] = eval(node.args[j]);
                         break;
                     }
-                    arguments[i] = try_cast_number(eval(node.args[i]), arg_types[i]);
+                    arguments[i - param_offset] = try_cast_some(eval(node.args[i]), arg_types[i - param_offset]);
                 }
                 return method.invoke(this_obj, arguments);
 
@@ -282,12 +288,12 @@ public class Interpreter {
 
     // I don't generally like this kind of name, I prefer: 'are_types_matching' or smth, but can't think of anything better rn
     private boolean is_of_type(Class a, Class b, String b_typename) {
-        return a.isAssignableFrom(b)
+        return a.isAssignableFrom(b) || b.isAssignableFrom(a)
             || b_typename.equals(SyntaxDefinitions.TYPE_ANY)
             || (Number.class.isAssignableFrom(b) && b_typename.equals(SyntaxDefinitions.TYPE_NUMBER));
     }
 
-    private Object try_cast_number(Object any, Class needed) {
+    private Object try_cast_some(Object any, Class needed) {
         if(needed.equals(byte.class))    return        ((Number) any).byteValue();
         if(needed.equals(short.class))   return        ((Number) any).shortValue();
         if(needed.equals(int.class))     return        ((Number) any).intValue();
@@ -300,6 +306,7 @@ public class Interpreter {
         if(needed.equals(Long.class))    return Long.      valueOf(       ((Number) any).longValue());
         if(needed.equals(Float.class))   return Float.     valueOf(       ((Number) any).floatValue());
         if(needed.equals(Double.class))  return Double.    valueOf(       ((Number) any).doubleValue());
+        if(needed.equals(CharSequence.class) && any.getClass().equals(String.class)) return ((String) any).subSequence(0, ((String) any).length());
         return any;
     }
 

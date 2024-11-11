@@ -1,7 +1,7 @@
 import org.lwjgl.opengl.GL33;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +66,7 @@ public class Main {
         Debug.send_ast_to_vis(ast);
 
         new TypeValidator().validate(ast);
+
 
 
         Interpreter interpreter = new Interpreter((Ast.Root) ast);

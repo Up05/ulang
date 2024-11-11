@@ -1,2 +1,8 @@
 
+func println(...) = foreign "NewBuiltin._println"
+
+func test(str: string, a: num) {
+    println(str)
+}
+test("teststr", 5)
 

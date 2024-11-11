@@ -34,6 +34,18 @@ public class Preprocessor {
                 tokens.addAll(i + 3, new_tokens);
                 i += 2;
             }
+            if(t.equals("$") && tokens.get(i + 1).equals("fetch")) {
+                char q = tokens.get(i + 2).charAt(0);
+                error.assertf(q != '(' && q != '<', "Character not allowed", "There must not be '(' or '<' characters after '$fetch'! Should be: '$fetch \"filename\"'");
+                error.assertf(q == '"' || q == '\'', "Missing quotes", "'$fetch \"filename\"' must have a filename in quotes! It is currently: '%s'", tokens.get(i + 2));
+                String filename = tokens.get(i + 2);
+                filename = filename.substring(1, filename.length() - 1);
+                String str = "\"" + Files.readString(base.resolve(filename)) + "\"";
+                tokens.set(i, str);
+                tokens.remove(i + 1); // this sucks :(
+                tokens.remove(i + 1);
+                i += 2;
+            }
 
         }
         return tokens;

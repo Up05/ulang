@@ -1,6 +1,15 @@
 $insert "std.u"
 $insert "opengl.u"
 
+func make_shader(source: string  shader_type: num  program: num) num {
+    shader: num = gl_create_shader(shader_type)
+    gl_shader_source(shader, source)
+    gl_compile_shader(shader)
+
+    gl_attach_shader(program, shader)
+    return shader
+}
+
 assert(glfw_init(), "Failed to initialize glfw!")
 window: num = glfw_create_window(600, 600, "ulang example #1", 0, 0)
 assert(window != 0, "Failed to create a window!")
@@ -11,13 +20,30 @@ glfw_show_window(window)
 
 gl_create_capabilities()
 
-gl_clear_color(1, 1, 0, 0)
+gl_clear_color(0.05, 0.05, 0.05, 0)
+
+verts: F32Buffer = buffer_f32_make(1024*2 * 3)
+
+vbo: num = gl_gen_buffers()
+gl_bind_buffer(34962, vbo)
+gl_vertex_attrib_pointer(0, 3, 5126, false, 3 * 4, verts)
+gl_enable_vertex_attrib_array(0)
+
+program: num = gl_create_program()
+vert_shader: num = make_shader($fetch "vert.glsl", 35633, program)
+frag_shader: num = make_shader($fetch "frag.glsl", 35632, program)
+gl_link_program(program)
 
 for !glfw_window_should_close(window) {
     gl_clear(16384 + 256) # COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT
+
+    gl_buffer_data(34962, verts, 35048)
+    gl_use_program(program)
+
+    gl_draw_arrays(0, 0, 1024)
+
     glfw_swap_buffers(window)
     glfw_poll_events()
-
 }
 
 glfw_terminate()

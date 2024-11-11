@@ -1,5 +1,5 @@
 typedef GLBitField = foreign "int"
-typedef f32Buffer  = foreign "java.nio.FloatBuffer"
+typedef F32Buffer  = foreign "java.nio.FloatBuffer"
 typedef i32Buffer  = foreign "java.nio.IntBuffer"
 
 # Initial / glfw stuff
@@ -19,10 +19,10 @@ func glfw_terminate() = foreign "org.lwjgl.glfw.GLFW.glfwTerminate"
 # vertex buffer objects
 func gl_gen_buffers() num = foreign "org.lwjgl.opengl.GL33.glGenBuffers"
 func gl_bind_buffer(target: num, buffer: num) = foreign "org.lwjgl.opengl.GL33.glBindBuffer"
-func gl_vertex_attrib_pointer(index: num, size: num, type: num, normalized: bool, stride: num, buffer: f32Buffer) = foreign "org.lwjgl.opengl.GL33.glVertexAttribPointer"
-func gl_enable_vertex_attrib_array(index: num) = foreign "org.lwjgl.gl.GL33.glEnableVertexAttribArray"
-func gl_buffer_data()
-func gl_draw_arrays()
+func gl_vertex_attrib_pointer(index: num, size: num, type: num, normalized: bool, stride: num, buffer: F32Buffer) = foreign "org.lwjgl.opengl.GL33.glVertexAttribPointer"
+func gl_enable_vertex_attrib_array(index: num) = foreign "org.lwjgl.opengl.GL33.glEnableVertexAttribArray"
+func gl_buffer_data(target: num, buf: F32Buffer, usage: num) = foreign "org.lwjgl.opengl.GL33.glBufferData"
+func gl_draw_arrays(mode: num, first: num, count: num) = foreign "org.lwjgl.opengl.GL33.glDrawArrays"
 
 # shaders
 func gl_create_program() num = foreign "org.lwjgl.opengl.GL33.glCreateProgram"
@@ -30,9 +30,16 @@ func gl_create_shader(type: num) = foreign "org.lwjgl.opengl.GL33.glCreateShader
 func gl_shader_source(shader: num, source: string) = foreign "org.lwjgl.opengl.GL33.glShaderSource"
 func gl_compile_shader(shader: num) = foreign "org.lwjgl.opengl.GL33.glCompileShader"
 func gl_get_shader_iv(shader: num, type: num, out: i32Buffer) = foreign "org.lwjgl.opengl.GL33.glGetShaderiv"
-func gl_get_shader_info_log()
-func gl_attach_shader()
-func gl_use_program()
+func gl_get_shader_info_log(shader: num) string = foreign "org.lwjgl.opengl.GL33.glGetShaderInfoLog"
+func gl_attach_shader(program: num, shader: num) = foreign "org.lwjgl.opengl.GL33.glAttachShader"
+func gl_use_program(program: num) = foreign "org.lwjgl.opengl.GL33.glUseProgram"
 func gl_link_program(program: num) = foreign "org.lwjgl.opengl.GL33.glLinkProgram"
 
 # java buffers  (they are used as pointer replacements)
+# I don't know, if I really want f32 here... Seems like just extra casts.
+func buffer_f32_get(index: num) num = foreign "java.nio.FloatBuffer.get"
+func buffer_f32_put(index: num, value: num) = foreign "java.nio.FloatBuffer.put"
+func buffer_i32_get(index: num) num = foreign "java.nio.IntBuffer.get"
+func buffer_i32_put(index: num, value: num) = foreign "java.nio.IntBuffer.put"
+func buffer_f32_make(count: num) F32Buffer = foreign "java.nio.FloatBuffer.allocate"
+func buffer_i32_make(count: num) F32Buffer = foreign "java.nio.IntBuffer.allocate"
