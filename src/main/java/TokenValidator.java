@@ -45,7 +45,7 @@ public class TokenValidator extends Stage<String> {
         else return false;
     }
 
-    private static final String[] tokens_to_skip = { "}", "]", ")", ";", ",", "return" };
+    private static final String[] tokens_to_skip = { "(", "}", "]", ")", ";", ",", "return" };
     private boolean skip_some_tokens() {
         if(Util.array_contains(tokens_to_skip, peek(0))) {
             next();
@@ -88,12 +88,19 @@ public class TokenValidator extends Stage<String> {
         String name = peek(0);
 
         validate_identifier(next(), "name of function: '%s'!", name);
-        assertf(next().equals("("),             "Missing parenthesis",  "Missing '(' in function: '%s' declaration!", name);
-        assertf(has_closing_paren('(', ')'),    "Missing parenthesis",  "missing ')' in function: '%s' declaration!", name);
+        assertf(next().equals("("),          "Missing parenthesis",  "Missing '(' in function: '%s' declaration!", name);
+        assertf(has_closing_paren('(', ')'), "Missing parenthesis",  "missing ')' in function: '%s' declaration!", name);
+
+        for(int i = 0; i < tokens.size() - curr; i ++) {
+            if(peek(i).equals(")")) break;
+            assertf(!peek(i).equals("="), "Default values not allowed",
+                "Default values are not allowed in function declaration. \n" +
+                "Please remove the '= %s' in '%s' declaration", peek(i + 1), name);
+        }
+
         int tries = 0;
         while(!peek(0).equals(")")) {
             v_decl();
-
             // super out of the blue, but I encountered it, so chances are, others will too...
             // either way, this class is meant as more of a "scripted" thing to catch all the human errors
             // (as well as to not need to reconfirm assumptions elsewhere)
@@ -103,7 +110,7 @@ public class TokenValidator extends Stage<String> {
             tries ++;
         }
         next();
-        if(!peek(0).equals("{") && !peek(0).equals("=")) v_type();
+        if(!peek(0).equals("{") && !peek(0).equals("=")) v_type(true);
         if(peek(0).equals("{")) {
             assertf(next().equals("{"), "Missing curly bracket", "Missing block i.e.: '{ ... }' after function: '%s' declaration!", name);
             assertf(has_closing_paren('{', '}'), "Missing curly bracket", "Missing '}' after function: '%s' declaration!", name);
@@ -135,7 +142,7 @@ public class TokenValidator extends Stage<String> {
         if(peek(0).equals(":")) {
             declared_vars.add(name);
             next();
-            v_type();
+            v_type(true);
             // next(); // Why was this here???
         }
 
@@ -154,7 +161,7 @@ public class TokenValidator extends Stage<String> {
             .bind(this::v_func_call)
             .bind(this::v_unary_operator)
             .bind(this::v_var)
-            .bind(this::v_type)
+            .bind(this::v_type_unsure)
             .bind(this::skip_some_tokens)
             // .bind(this::unexpected_token)
             .unwrap();
@@ -203,8 +210,8 @@ public class TokenValidator extends Stage<String> {
 
         return false;
     }
-
-    private boolean v_type() {
+    private boolean v_type_unsure() { return v_type(false); }
+    private boolean v_type(boolean sure) {
         if(peek(0).equals("[")) {
             next();
             if(peek(0).equals("map")) {
@@ -213,9 +220,11 @@ public class TokenValidator extends Stage<String> {
             }
             assertf(next().equals("]"), "Missing ']'", "Array type syntax needs both '[' and ']'. Missing: ']'!");
         }
-        if(peek(0).equals("[")) v_type();
-        else validate_identifier(peek(0), "type: '%s'", next());
-        return true;
+        if(peek(0).equals("[")) return v_type(true);
+        else if(sure) validate_identifier(peek(0), "type: '%s'", next());
+        else if(Validator.find_bad_char_in_name(peek(0)) == '\0') {
+            next(); return true; }
+        return false;
     }
 
     private boolean v_var() {
@@ -341,14 +350,11 @@ public class TokenValidator extends Stage<String> {
     private void validate_identifier(String token, String in_where, String identifier) {
         char bad_char = Validator.find_bad_char_in_name(token);
         assertf(bad_char == 0, "Invalid identifier", "Found bad character: '%c' in the " + in_where, bad_char, identifier);
-
-        for(String keyword : SyntaxDefinitions.reserved) {
-            assertf(!token.equals(keyword), "Reserved identifier", "Found reserved identifier: '%s' in the " + in_where + "\nThis word may be used in the language in the future.", identifier, keyword);
-        }
     }
 
     // I did not copy her, it’s not true! It’s bullsh*t! I did not copy her! I did not!
     private int matching_operator_chars(String[] all) {
+        System.out.println(peek(0));
         for(String op : all) {
             boolean matches = true;
             for(int i = 0; i < op.length(); i ++) {

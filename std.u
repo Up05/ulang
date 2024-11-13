@@ -2,6 +2,23 @@
 # What's the simples way to do errors? Well, just have a global variable...
 error : num = 0
 
+# Java primitives
+typedef u8  = foreign "byte"
+typedef i8  = foreign "char"
+typedef i16 = foreign "short"
+typedef i32 = foreign "int"
+typedef i64 = foreign "long"
+typedef f32 = foreign "float"
+typedef f64 = foreign "double"
+typedef u8_arr  = foreign "[B" # This is the best explanation & table I have found so far
+typedef i8_arr  = foreign "[C" # https://dev.java/learn/reflection/names/#array
+typedef b8_arr  = foreign "[Z"
+typedef i16_arr = foreign "[S"
+typedef i32_arr = foreign "[I"
+typedef i64_arr = foreign "[J"
+typedef f32_arr = foreign "[F"
+typedef f64_arr = foreign "[D"
+
 # Builtin functions
 func new(obj: type, ...) any = foreign "NewBuiltin._new"
 func print(...)   = foreign "NewBuiltin._print"
@@ -15,6 +32,11 @@ func len(arr: [] any) num = foreign "NewBuiltin._len"
 func len_java(...) num = foreign "NewBuiltin._len" # '...' is 'Object[] array'
 func len_str(str: string) num = foreign "NewBuiltin._len"
 
-typedef vec3 = foreign "org.joml.Vector3d"
-typedef mat3 = foreign "org.joml.Matrix3d"
+func copy_to_f64_array(arr: [] any) f64_arr = foreign "NewBuiltin._copy_to_f64_array"
 
+# Math
+
+PI: num = 3.14159265358979323
+func sqrt(n: num) num = foreign "org.joml.Math.sqrt"
+func sin(n: num)  num = foreign "org.joml.Math.sin"
+func cos(n: num)  num = foreign "org.joml.Math.cos"

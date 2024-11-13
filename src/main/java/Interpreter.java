@@ -41,10 +41,15 @@ public class Interpreter {
 
     // To check where variable was declared in a different scope or not to check whether variable was declared in a different scope?
     private void declare_var(Ast.Decl node) {
+        for(HashMap<String, Object> scope : scopes) {
+            node.error.prefix = Error.Type.RUNTIME;
+            node.error.assertf(!scope.containsKey(node), "Redeclaration of a variable", "Variable '%s' has been redeclared", node.name);
+        }
+
         Object val = eval(node.value);
         if(val != null)
             node.error.assertf(is_of_type(node.type, val.getClass(), node.typename), "Mismatched types",
-                "given '%s', expected '%s' or '%s'!", val.getClass().getSimpleName(), node.typename, node.type.getSimpleName());
+                "Got '%s', expected '%s' or '%s'!", val.getClass().getName(), node.typename, node.type.getSimpleName());
 
         scopes.peek().put(node.name, val);
     }
@@ -64,7 +69,7 @@ public class Interpreter {
                     return val;
                 }
             }
-            temp_assertf(false, "Trying to get the value of an undeclared variable"); // This should not get past the Validator
+            temp_assertf(false, "Trying to get the value of an undeclared variable: " + node.name); // This should not get past the Validator
         }
         case Ast.Func node -> {
             return call(node);
@@ -87,6 +92,7 @@ public class Interpreter {
     }
 
     private Object call(Ast.Func node) {
+        scopes.push(new HashMap<>()); // intermediate
 
         Ast.FnDecl decl = null;
         for(Ast child : root.children) {
@@ -94,12 +100,7 @@ public class Interpreter {
                 if(node.name.equals(decl_node.name))
                     decl = decl_node;
         }
-        node.error.assertf(decl != null, "Function is not declared", "Trying to call an undeclared function '%s'!");
-        // if(decl == null) {
-        //     return call_builtin(node);
-        // }
-
-        scopes.push(new HashMap<>());
+        node.error.assertf(decl != null, "Function is not declared", "Trying to call an undeclared function '%s'!", node.name);
 
         for(Ast.Decl arg : decl.args) {
             declare_var(arg);
@@ -108,11 +109,13 @@ public class Interpreter {
         for(int i = 0; i < node.args.length; i ++) {
             if(decl.args.get(i).typename.equals(SyntaxDefinitions.TYPE_VARARGS)) {
                 Object[] arguments = new Object[node.args.length - i];
-                for(int j = 0; j < node.args.length; j ++) {
+                for(int j = i; j < node.args.length; j ++) {
                     arguments[j - i] = node.args[j];
                 }
+                scopes.peek().put(decl.args.get(i).name, arguments);
                 break;
             }
+
             scopes.peek().put(decl.args.get(i).name, eval(node.args[i]));
         }
         if(!decl.args.isEmpty() && decl.args.getLast().typename.equals(SyntaxDefinitions.TYPE_VARARGS) && decl.args.size() + 1 == node.args.length) {
@@ -137,7 +140,7 @@ public class Interpreter {
                     this_obj = eval(node.args[0]); param_offset = 1;
                     temp_assertf(cl.isInstance(this_obj), "The foreign function: '" + method.getName() + "' is not static, so it's first argument must be the 'this' object!");
                 }
-                for(int i = param_offset; i < arg_types.length; i ++) {
+                for(int i = param_offset; i < arg_types.length + param_offset; i ++) {
                     if(decl.args.get(i).typename.equals(SyntaxDefinitions.TYPE_VARARGS) &&
                         arg_types[i].equals(Object[].class)) {
                         arguments[i] = new Object[node.args.length - i];
@@ -147,21 +150,27 @@ public class Interpreter {
                     }
                     arguments[i - param_offset] = try_cast_some(eval(node.args[i]), arg_types[i - param_offset]);
                 }
-                return method.invoke(this_obj, arguments);
-
+                Object val = method.invoke(this_obj, arguments);
+                scopes.pop();
+                return val;
             } catch (Exception e) {
-                System.out.println();
+                System.out.println("HANDLED ERROR");
+                System.out.printf("In function: '%s'\n  %s\n", node.name, Debug.zip(node));
                 e.printStackTrace();
                 System.exit(1);
             }
         } else {
-            for (Ast child : decl.body) {
-                if (child instanceof Ast.Ret ret_stmt)
-                    return eval(ret_stmt.expr);
+            for(Ast child : decl.body) {
+                if(child instanceof Ast.Ret ret_stmt) {
+                    Object val = eval(ret_stmt.expr);
+                    scopes.pop();
+                    return val;
+                }
                 interpret(child);
             }
         }
 
+        scopes.pop();
         assert decl.ret == null;
         return null;
     }
@@ -216,7 +225,7 @@ public class Interpreter {
         case "-": return ((Number) a).doubleValue() - ((Number) b).doubleValue();
         case "*": return ((Number) a).doubleValue() * ((Number) b).doubleValue();
         case "/": return ((Number) a).doubleValue() / ((Number) b).doubleValue();
-        case "%": return null;
+        case "%": return ((Number) a).doubleValue() % ((Number) b).doubleValue();
         }
         return null;
     }
@@ -290,22 +299,29 @@ public class Interpreter {
     private boolean is_of_type(Class a, Class b, String b_typename) {
         return a.isAssignableFrom(b) || b.isAssignableFrom(a)
             || b_typename.equals(SyntaxDefinitions.TYPE_ANY)
-            || (Number.class.isAssignableFrom(b) && b_typename.equals(SyntaxDefinitions.TYPE_NUMBER));
+            || (is_number(a) && is_number(b))
+            || a.getSimpleName().equalsIgnoreCase(b.getSimpleName());
+    }
+    // Fast approaching JavaScript levels of fun here...
+    private boolean is_number(Class c) {
+        return Number.class.isAssignableFrom(c) || c.isPrimitive();
     }
 
-    private Object try_cast_some(Object any, Class needed) {
-        if(needed.equals(byte.class))    return        ((Number) any).byteValue();
-        if(needed.equals(short.class))   return        ((Number) any).shortValue();
-        if(needed.equals(int.class))     return        ((Number) any).intValue();
-        if(needed.equals(long.class))    return        ((Number) any).longValue();
-        if(needed.equals(float.class))   return        ((Number) any).floatValue();
-        if(needed.equals(double.class))  return        ((Number) any).doubleValue();
-        if(needed.equals(Byte.class))    return Byte.      valueOf(       ((Number) any).byteValue());
-        if(needed.equals(Short.class))   return Short.     valueOf(       ((Number) any).shortValue());
-        if(needed.equals(Integer.class)) return Integer.   valueOf(       ((Number) any).intValue());
-        if(needed.equals(Long.class))    return Long.      valueOf(       ((Number) any).longValue());
-        if(needed.equals(Float.class))   return Float.     valueOf(       ((Number) any).floatValue());
-        if(needed.equals(Double.class))  return Double.    valueOf(       ((Number) any).doubleValue());
+    // After a month of usage, I have noticed, that this does absolute fucking nothing.
+    public static Object try_cast_some(Object any, Class needed) {
+        if(needed.equals(byte.class))    return ((Number) any).byteValue();
+        if(needed.equals(short.class))   return ((Number) any).shortValue();
+        if(needed.equals(int.class))     return ((Number) any).intValue();
+        if(needed.equals(long.class))    return ((Number) any).longValue();
+        if(needed.equals(float.class))   return ((Number) any).floatValue();
+        if(needed.equals(double.class))  return ((Number) any).doubleValue();
+        if(needed.equals(Byte.class))    return Byte.   valueOf(((Number) any).byteValue());
+        if(needed.equals(Short.class))   return Short.  valueOf(((Number) any).shortValue());
+        if(needed.equals(Integer.class)) return Integer.valueOf(((Number) any).intValue());
+        if(needed.equals(Long.class))    return Long.   valueOf(((Number) any).longValue());
+        if(needed.equals(Float.class))   return Float.  valueOf(((Number) any).floatValue());
+        if(needed.equals(Double.class))  return Double. valueOf(((Number) any).doubleValue());
+
         if(needed.equals(CharSequence.class) && any.getClass().equals(String.class)) return ((String) any).subSequence(0, ((String) any).length());
         return any;
     }

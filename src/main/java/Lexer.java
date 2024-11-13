@@ -135,8 +135,8 @@ public class Lexer extends Stage<String> {
 
         next(); // skips '('
         while(true) {
-            if (peek(0).equals(",")) next();
-            if (peek(0).equals(")")) break;
+            if(peek(0).equals(",")) next();
+            if(peek(0).equals(")")) break;
             lex_var();
         }
         next(); // skips ')'
@@ -246,8 +246,9 @@ public class Lexer extends Stage<String> {
                 return true;
             }
 
-            Type prev_token = lexed_tokens.get(lexed_tokens.size() - 1).type;
-            if(Util.array_contains(SyntaxDefinitions.tokens_potentially_before_binary_operator, prev_token)) {
+            Token prev_token = lexed_tokens.get(lexed_tokens.size() - 1);
+            if( Util.array_contains(SyntaxDefinitions.tokens_potentially_before_binary_operator, prev_token.type) ||
+                Util.array_contains(new Character[]{ ')', ']' }, prev_token.token.charAt(0))) {
                 lexed_tokens.add(new Token(concat_tokens(binary), Type.BINARY_OPERATOR));
                 return true;
             }

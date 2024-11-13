@@ -3,6 +3,6 @@ out vec4 FragColor;
 in float brightness;
 
 void main() {
-	FragColor = vec4(.5f, .8f, .4f, 1f);
+	FragColor = vec4(1.2f, 1.5f, 1.1f, 1f);
 	FragColor.xyz *= brightness;
 }

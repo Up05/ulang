@@ -9,27 +9,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Forgot to add NewBuiltin.class">
-      <change beforePath="$PROJECT_DIR$/.idea/artifacts/ulang_jar.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/artifacts/ulang_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/joml_1_10_7.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/lwjgl.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/lwjgl_glfw.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/lwjgl_opengl.xml" beforeDir="false" />
+    <list default="true" id="926cd32d-75a7-4840-83c5-9ea599d83e3a" name="Changes" comment="Time is no. :(">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glfw_example/frag.glsl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glfw_example/vert.glsl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frag.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/frag.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid7054.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hs_err_pid7170.log" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/opengl.u" beforeDir="false" afterPath="$PROJECT_DIR$/opengl.u" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/ulang.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/ulang.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Debug.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Debug.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Interpreter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Interpreter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Lexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Lexer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Preprocessor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Preprocessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/NewBuiltin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/NewBuiltin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/SyntaxDefinitions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/TokenValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TokenValidator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/TypeValidator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/TypeValidator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/std.u" beforeDir="false" afterPath="$PROJECT_DIR$/std.u" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Interpreter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Interpreter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Lexer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Lexer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/Preprocessor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Preprocessor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/NewBuiltin.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/NewBuiltin.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SyntaxDefinitions$OperatorTypeData.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SyntaxDefinitions$OperatorTypeData.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/SyntaxDefinitions.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/TokenValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TokenValidator.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/TypeValidator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/TypeValidator.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.u" beforeDir="false" afterPath="$PROJECT_DIR$/test.u" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test2.u" beforeDir="false" afterPath="$PROJECT_DIR$/test2.u" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vert.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/vert.glsl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +70,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
@@ -84,19 +90,19 @@
     "JAR Application.Build & Run.executor": "Run",
     "JAR Application.Build & run.executor": "Run",
     "JAR Application.Unnamed.executor": "Run",
+    "JAR Application.lwjglx-debug-1.0.0.jar.executor": "Debug",
     "Repository.Attach.Annotations": "false",
     "Repository.Attach.JavaDocs": "true",
     "Repository.Attach.Sources": "false",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/ulti/src/ulang/lib/lwjgl.jar",
-    "project.structure.last.edited": "Artifacts",
+    "last_opened_file_path": "D:/src/java/ulang/lib",
+    "project.structure.last.edited": "SDKs",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.keymap"
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -116,7 +122,7 @@
     <configuration name="Build &amp; Run" type="JarApplication">
       <option name="JAR_PATH" value="$PROJECT_DIR$/out/ulang.jar" />
       <option name="PROGRAM_PARAMETERS" value="test.u" />
-      <option name="WORKING_DIRECTORY" value="$ContentRoot$" />
+      <option name="WORKING_DIRECTORY" value="D:\src\java\ulang" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="ALTERNATIVE_JRE_PATH" value="21" />
       <method v="2">
@@ -352,13 +358,18 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <default-breakpoints>
-        <breakpoint enabled="true" log-stack="true" type="java-exception" />
-      </default-breakpoints>
+      <breakpoints>
+        <line-breakpoint type="java-line">
+          <url>jar://C:/Program Files/OpenJDK/jdk-21.0.2/lib/src.zip!/java.base/sun/invoke/util/ValueConversions.java</url>
+          <line>134</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JarApplication">
-        <watch expression="peek(0)" />
+        <watch expression="node.name" language="JAVA" />
+        <watch expression="scopes" language="JAVA" />
       </configuration>
     </watches-manager>
   </component>

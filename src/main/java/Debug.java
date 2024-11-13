@@ -120,6 +120,12 @@ public class Debug {
         return b.toString();
     }
 
+    public static String stringify_param_types_obj(Object[] params) {
+        String[] typenames = new String[params.length];
+        for(int i = 0; i < params.length; i ++) typenames[i] = params[i].getClass().getSimpleName();
+        return stringify_param_types(typenames);
+    }
+
     public static String stringify_param_types(Class[] params) {
         String[] typenames = new String[params.length];
         for(int i = 0; i < params.length; i ++) typenames[i] = params[i].getSimpleName();

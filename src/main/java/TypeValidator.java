@@ -19,6 +19,9 @@ public class TypeValidator {
             for(Ast child : node.children) validate(child);
         }
         case Ast.Decl node -> {
+            for(HashMap<String, String> scope : scopes)
+                node.error.assertf(!scope.containsKey(node.name), "Redeclaration", "Variable '%s' has already been declared", node.name);
+
             scopes.peek().put(node.name, node.typename);
             if(node.value != null)
                 assertf_type(node.error, node.typename, node.value, "declaration of " + node.name);
@@ -111,6 +114,7 @@ public class TypeValidator {
     }
 
     private void assertf_type(Error error, String type, Ast expr, String in_where) {
+
         String type2 = validate(expr);
         if(type == null || type2 == null) {
             System.out.printf("Skipped type checking in '%s' on line %d. In %s\n", error.file, error.line, in_where);

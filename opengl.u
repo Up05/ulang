@@ -1,6 +1,6 @@
 typedef GLBitField = foreign "int"
-typedef F32Buffer  = foreign "java.nio.FloatBuffer"
-typedef i32Buffer  = foreign "java.nio.IntBuffer"
+typedef F64Buffer  = foreign "java.nio.DoubleBuffer"
+typedef I32Buffer  = foreign "java.nio.IntBuffer"
 
 # Initial / glfw stuff
 func glfw_init() bool = foreign "org.lwjgl.glfw.GLFW.glfwInit"
@@ -19,27 +19,40 @@ func glfw_terminate() = foreign "org.lwjgl.glfw.GLFW.glfwTerminate"
 # vertex buffer objects
 func gl_gen_buffers() num = foreign "org.lwjgl.opengl.GL33.glGenBuffers"
 func gl_bind_buffer(target: num, buffer: num) = foreign "org.lwjgl.opengl.GL33.glBindBuffer"
-func gl_vertex_attrib_pointer(index: num, size: num, type: num, normalized: bool, stride: num, buffer: F32Buffer) = foreign "org.lwjgl.opengl.GL33.glVertexAttribPointer"
+func gl_vertex_attrib_pointer(index: num, size: num, type: num, normalized: bool, stride: num, pointer: num) = foreign "org.lwjgl.opengl.GL33.glVertexAttribPointer"
 func gl_enable_vertex_attrib_array(index: num) = foreign "org.lwjgl.opengl.GL33.glEnableVertexAttribArray"
-func gl_buffer_data(target: num, buf: F32Buffer, usage: num) = foreign "org.lwjgl.opengl.GL33.glBufferData"
+func gl_buffer_data(target: num, buf: F64Buffer, usage: num) = foreign "org.lwjgl.opengl.GL33.glBufferData"
 func gl_draw_arrays(mode: num, first: num, count: num) = foreign "org.lwjgl.opengl.GL33.glDrawArrays"
 
 # shaders
 func gl_create_program() num = foreign "org.lwjgl.opengl.GL33.glCreateProgram"
-func gl_create_shader(type: num) = foreign "org.lwjgl.opengl.GL33.glCreateShader"
+func gl_create_shader(type: num) num = foreign "org.lwjgl.opengl.GL33.glCreateShader"
 func gl_shader_source(shader: num, source: string) = foreign "org.lwjgl.opengl.GL33.glShaderSource"
 func gl_compile_shader(shader: num) = foreign "org.lwjgl.opengl.GL33.glCompileShader"
-func gl_get_shader_iv(shader: num, type: num, out: i32Buffer) = foreign "org.lwjgl.opengl.GL33.glGetShaderiv"
+func gl_get_shader_iv(shader: num, type: num, out: I32Buffer) = foreign "org.lwjgl.opengl.GL33.glGetShaderiv"
 func gl_get_shader_info_log(shader: num) string = foreign "org.lwjgl.opengl.GL33.glGetShaderInfoLog"
 func gl_attach_shader(program: num, shader: num) = foreign "org.lwjgl.opengl.GL33.glAttachShader"
 func gl_use_program(program: num) = foreign "org.lwjgl.opengl.GL33.glUseProgram"
 func gl_link_program(program: num) = foreign "org.lwjgl.opengl.GL33.glLinkProgram"
 
-# java buffers  (they are used as pointer replacements)
+# java buffers (they are used as pointer replacements)
 # I don't know, if I really want f32 here... Seems like just extra casts.
-func buffer_f32_get(index: num) num = foreign "java.nio.FloatBuffer.get"
-func buffer_f32_put(index: num, value: num) = foreign "java.nio.FloatBuffer.put"
-func buffer_i32_get(index: num) num = foreign "java.nio.IntBuffer.get"
-func buffer_i32_put(index: num, value: num) = foreign "java.nio.IntBuffer.put"
-func buffer_f32_make(count: num) F32Buffer = foreign "java.nio.FloatBuffer.allocate"
-func buffer_i32_make(count: num) F32Buffer = foreign "java.nio.IntBuffer.allocate"
+func buffer_f64_get(b: F64Buffer, index: num) num = foreign "java.nio.DoubleBuffer.get"
+func buffer_f64_put(b: F64Buffer, arr: f64_arr) = foreign "java.nio.DoubleBuffer.put"
+func buffer_f64_make(count: num) F64Buffer = foreign "org.lwjgl.BufferUtils.createDoubleBuffer"
+# I am not connecting my points, but I feel someone might want this...
+func buffer_i32_get(b: I32Buffer, index: num) num = foreign "java.nio.IntBuffer.get"
+func buffer_i32_put(b: I32Buffer, arr: i64_arr) = foreign "java.nio.IntBuffer.put"
+func buffer_i32_make(count: num) I32Buffer = foreign "org.lwjgl.BufferUtils.createIntBuffer"
+# java buffer.make the program not crash for fun
+func buffer_f64_flip(b: F64Buffer) = foreign "java.nio.DoubleBuffer.flip"
+func buffer_i32_flip(b: I32Buffer) = foreign "java.nio.IntBuffer.flip"
+
+# math / joml
+
+typedef vec = foreign "org.joml.Vector3d"
+typedef mat = foreign "org.joml.Matrix3d"
+func v_get(v: vec, comp: num) num = foreign "org.joml.Vector3d.get"
+func v_mul(v: vec, m: mat) = foreign "org.joml.Vector3d.mul"
+func m_rotate_y(m: mat, angle: num) mat = foreign "org.joml.Matrix3d.rotateY"
+
