@@ -1,9 +1,9 @@
 $insert "std.u"
 $insert "opengl.u"
 
-func make_uniform_sphere(radius: num, samples: num, transform: mat) [] num {
+func make_uniform_sphere(pts: f64_arr, radius: num, samples: num, transform: mat) {
     phi: num = PI * (sqrt(5) - 1)
-    pts: [] num = make_array(samples * 3)
+    # pts: [] num = make_array(samples * 3)
 
     for i: num = 0; i < samples; i = i + 1 {
 
@@ -11,16 +11,16 @@ func make_uniform_sphere(radius: num, samples: num, transform: mat) [] num {
         long_radius: num = sqrt(1 - y * y)
         angle: num = phi * i
         v: vec = new(vec, cos(angle) * long_radius, y, sin(angle) * long_radius)
-        v_mul(v, transform)
-        pts[i*3+0] = v_get(v, 0)
-        pts[i*3+1] = v_get(v, 1)
-        pts[i*3+2] = v_get(v, 2)
+        v_mul_mat(v, transform)
+        v_mul_f64(v, radius)
+        # pts[i*3+0] = v_get(v, 0) ...
+        set_f64_arr(pts, i*3+0, v_get(v, 0))
+        set_f64_arr(pts, i*3+1, v_get(v, 1))
+        set_f64_arr(pts, i*3+2, v_get(v, 2))
     }
-    return pts
 }
 
 func make_shader(source: string  shader_type: num  program: num) num {
-    println(shader_type)
     shader: num = gl_create_shader(shader_type)
     gl_shader_source(shader, source)
     gl_compile_shader(shader)
@@ -35,33 +35,30 @@ assert(window != 0, "Failed to create a window!")
 glfw_make_context_current(window)
 glfw_swap_interval(1)
 glfw_show_window(window)
-
 gl_create_capabilities()
-
-gl_clear_color(0.05, 0.05, 0.05, 0)
-
-SAMPLES: num = 1000
-# positions: [] num = [ 0, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0 ]
 
 vbo: num = gl_gen_buffers()
 gl_bind_buffer(34962, vbo)
 gl_enable_vertex_attrib_array(0)
 gl_vertex_attrib_pointer(0, 3, 5130, true, 0, 0)
 
+gl_clear_color(0.05, 0.05, 0.05, 0)
 program: num = gl_create_program()
 vert_shader: num = make_shader($fetch "vert.glsl", 35633, program)
 frag_shader: num = make_shader($fetch "frag.glsl", 35632, program)
 gl_link_program(program)
 gl_use_program(program)
 
+SAMPLES: num = 1024
+positions: f64_arr = make_array_java(f64, SAMPLES * 3)
+verts: F64Buffer = buffer_f64_make(SAMPLES * 3)
+
 frames: num = 0
 for !glfw_window_should_close(window) {
     gl_clear(16384 + 256) # COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT
 
-    # If you copy once, why not copy twice? I'm pretty sure that's the Java mantra anyways...
-    verts: F64Buffer = buffer_f64_make(SAMPLES * 3)
-    positions: [] num = make_uniform_sphere(0.8 * (frames % 200 / 100), SAMPLES, m_rotate_y(new(mat), frames / 50))
-    buffer_f64_put(verts, copy_to_f64_array(positions))
+    make_uniform_sphere(positions, 0.8, SAMPLES, m_rotate_y(new(mat), frames / 50))
+    buffer_f64_put(verts, positions)
     buffer_f64_flip(verts)
 
 

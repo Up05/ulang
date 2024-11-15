@@ -7,6 +7,9 @@ public class Interpreter {
     Ast.Root root;
     Builtin builtin = new Builtin();
 
+
+    HashMap<String, Method> foreign_func_cache = new HashMap<>();
+
     public Interpreter(Ast.Root root) {
         scopes = new Stack<>();
         scopes.push(new HashMap<>());
@@ -126,25 +129,30 @@ public class Interpreter {
             NewBuiltin.last_error = node.error;
             int dot = decl.path.lastIndexOf(".");
             node.error.assertf(dot != -1, "Expected class to be specified", "You must specify a class path in `foreign \"path.to.class.function\"` expression!");
+
+            Class[] arg_types = null;
+            Object[] arguments = null;
+
             try {
                 Class cl = Class.forName(decl.path.substring(0, dot));
                 Method method = find_matching_method(cl, decl.path.substring(dot + 1), decl);
 
-                Class[] arg_types = method.getParameterTypes();
-                Object[] arguments = new Object[arg_types.length];
+                arg_types = method.getParameterTypes();
+                arguments = new Object[arg_types.length];
 
-                Object this_obj  = null;
+                Object this_obj = null;
                 int param_offset = 0;
 
-                if(!Modifier.isStatic(method.getModifiers())) {
-                    this_obj = eval(node.args[0]); param_offset = 1;
+                if (!Modifier.isStatic(method.getModifiers())) {
+                    this_obj = eval(node.args[0]);
+                    param_offset = 1;
                     temp_assertf(cl.isInstance(this_obj), "The foreign function: '" + method.getName() + "' is not static, so it's first argument must be the 'this' object!");
                 }
-                for(int i = param_offset; i < arg_types.length + param_offset; i ++) {
-                    if(decl.args.get(i).typename.equals(SyntaxDefinitions.TYPE_VARARGS) &&
+                for (int i = param_offset; i < arg_types.length + param_offset; i++) {
+                    if (decl.args.get(i).typename.equals(SyntaxDefinitions.TYPE_VARARGS) &&
                         arg_types[i].equals(Object[].class)) {
                         arguments[i] = new Object[node.args.length - i];
-                        for(int j = i; j < node.args.length; j ++)
+                        for (int j = i; j < node.args.length; j++)
                             ((Object[]) arguments[i - param_offset])[j - i] = eval(node.args[j]);
                         break;
                     }
@@ -153,8 +161,12 @@ public class Interpreter {
                 Object val = method.invoke(this_obj, arguments);
                 scopes.pop();
                 return val;
-            } catch (Exception e) {
-                System.out.println("HANDLED ERROR");
+            } catch(IllegalArgumentException e) {
+                System.out.println("Expected: " + Debug.stringify_param_types(arg_types));
+                System.out.println("Received: " + Debug.stringify_param_types_obj(arguments));
+                e.printStackTrace();
+                System.exit(1);
+            } catch(Exception e) {
                 System.out.printf("In function: '%s'\n  %s\n", node.name, Debug.zip(node));
                 e.printStackTrace();
                 System.exit(1);
@@ -269,6 +281,9 @@ public class Interpreter {
     }
 
     private Method find_matching_method(Class parent, String name, Ast.FnDecl decl) {
+        Method cached = foreign_func_cache.get(decl);
+        if(cached != null) return cached;
+
         Method[] methods = parent.getMethods();
         for(Method method : methods) {
             if(!method.getName().equals(name)) continue;
@@ -282,6 +297,7 @@ public class Interpreter {
                 Ast.Decl arg = decl.args.get(i + (!is_static?1:0));
                 all_match &= is_of_type(params[i], arg.type, arg.typename);
             }
+            foreign_func_cache.put(decl.name, method);
             if(all_match) return method;
         }
 

@@ -53,6 +53,7 @@ func buffer_i32_flip(b: I32Buffer) = foreign "java.nio.IntBuffer.flip"
 typedef vec = foreign "org.joml.Vector3d"
 typedef mat = foreign "org.joml.Matrix3d"
 func v_get(v: vec, comp: num) num = foreign "org.joml.Vector3d.get"
-func v_mul(v: vec, m: mat) = foreign "org.joml.Vector3d.mul"
+func v_mul_mat(v: vec, m: mat) = foreign "org.joml.Vector3d.mul"
+func v_mul_f64(v: vec, m: num) = foreign "org.joml.Vector3d.mul"
 func m_rotate_y(m: mat, angle: num) mat = foreign "org.joml.Matrix3d.rotateY"
 

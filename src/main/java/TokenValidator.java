@@ -354,7 +354,6 @@ public class TokenValidator extends Stage<String> {
 
     // I did not copy her, it’s not true! It’s bullsh*t! I did not copy her! I did not!
     private int matching_operator_chars(String[] all) {
-        System.out.println(peek(0));
         for(String op : all) {
             boolean matches = true;
             for(int i = 0; i < op.length(); i ++) {

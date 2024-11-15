@@ -131,13 +131,20 @@ public class Lexer extends Stage<String> {
     private boolean lex_func_decl() { // TODO: Totally redid the function, so it works without calling parse_type in the normal parse_expr
         if(!peek(0).equals("func")) return false;
         next(); // skips 'func'
-        lexed_tokens.add(new Token(next(), Type.FUNCTION_DECL));
+        String name = next();
+        lexed_tokens.add(new Token(name, Type.FUNCTION_DECL));
 
+        int tries = 0;
         next(); // skips '('
         while(true) {
             if(peek(0).equals(",")) next();
             if(peek(0).equals(")")) break;
             lex_var();
+            if(tries > 10000) {
+                System.out.println("Lexer is hung on token: " + peek(0) + " in parameters of function's " + name + " declaration");
+                System.exit(1);
+            }
+            tries ++;
         }
         next(); // skips ')'
 

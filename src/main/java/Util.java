@@ -46,5 +46,11 @@ public class Util {
         return b.toString();
     }
 
+    public static int summed_array_type_hash(Object[] array) {
+        int sum = 0;
+        for(int i = 0; i < array.length; i ++) sum += array[i].getClass().hashCode();
+        return sum;
+    }
+
 }
 

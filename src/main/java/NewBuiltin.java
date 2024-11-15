@@ -1,15 +1,18 @@
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class NewBuiltin {
 
     static Error last_error = null; // This kind of sucks and disallows multi-threading. If I ever add that, I would have to rewrite Interpreter and these functions with a 1st 'Context' param... Oh well...
+    static HashMap<Integer, Constructor<?>> constructor_cache = new HashMap<>();
 
     // Does not work with numbers of different types and especially: 'Double' & 'int', PROBABLY
     public static Object _new(Class type, Object... params) {
+        Constructor<?> cached = constructor_cache.get(type.hashCode() + Util.summed_array_type_hash(params));
+        if(cached != null)
+            try { return cached.newInstance(params); } catch(Exception e) { e.printStackTrace(); System.exit(1); }
+
         Constructor<?>[] constructors = type.getConstructors();
         main: for(Constructor constructor : constructors) {
             if(constructor.getParameterTypes().length != params.length) continue;
@@ -20,6 +23,7 @@ public class NewBuiltin {
                     !params[j].getClass().isAssignableFrom(c_type)) continue main;
             }
             try {
+                constructor_cache.put(type.hashCode() + Util.summed_array_type_hash(params), constructor);
                 return constructor.newInstance(params);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -65,6 +69,11 @@ public class NewBuiltin {
     public static Object _len(Object[] array)    { return array.length; }
     public static Object _len(String string)     { return string.length(); }
 
+    public static Object _make_array_java(Class type, int len) {
+        return (Object) Array.newInstance(type, len);
+    }
+
+    public static void _set_f64_arr(double[] arr, int index, double obj) { arr[index] = obj; }
     // This is so sad :(, I already have the data in that exact format, so, e.g.:
     // in Odin or C, this would be list.buf or list[:]
     public static double[] _copy_to_f64_array(List<Object> list) {
